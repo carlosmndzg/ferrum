@@ -1,5 +1,11 @@
 use std::{error::Error, fs::File, io::Read};
 
+use dom::print_dom;
+use html::parser::HtmlParser;
+
+mod dom;
+mod html;
+
 pub struct Config {
     pub file_path: String,
 }
@@ -18,8 +24,10 @@ impl Config {
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = get_file_contents(&config.file_path)?;
+    let parser = html::factory::create_parser();
+    let dom = parser.parse(&contents);
 
-    println!("Contents: {}", contents);
+    print_dom(dom);
 
     Ok(())
 }
