@@ -32,3 +32,24 @@ fn get_file_contents(file_path: &str) -> Result<String, Box<dyn Error>> {
 
     Ok(contents)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_build() {
+        let args = vec![String::from("program_name"), String::from("file_path")];
+        let config = Config::build(&args).unwrap();
+
+        assert_eq!(config.file_path, "file_path");
+    }
+
+    #[test]
+    #[should_panic(expected = "file path is required")]
+    fn test_config_build_not_enough_args() {
+        let args = vec![String::from("program_name")];
+
+        Config::build(&args).unwrap();
+    }
+}
