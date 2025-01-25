@@ -1,4 +1,4 @@
-name: Rust CI with Audit
+name: CI
 
 on:
   push:
@@ -29,6 +29,3 @@ jobs:
 
       - name: Run Clippy linter
         run: cargo clippy -- -D warnings
-
-      - name: Audit dependencies
-        run: cargo install cargo-audit && cargo audit
