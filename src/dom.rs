@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Node {
     Document(Document),
     DocType(DocType),
@@ -7,27 +7,27 @@ pub enum Node {
     Element(Element),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Document {
     pub children: Vec<Node>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct DocType {
     pub name: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Comment {
     pub text: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Text {
     pub text: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Element {
     pub tag_name: String,
     pub attributes: Vec<Attribute>,
@@ -66,7 +66,7 @@ impl NodeFactory {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Attribute {
     pub name: String,
     pub value: String,

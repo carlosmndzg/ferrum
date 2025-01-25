@@ -89,3 +89,128 @@ impl From<VectorWrapper<Attribute>> for Vec<Attribute> {
         wrapper.0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_html5ever_basic_parse() {
+        let parser = Html5everParser;
+        let html = r#"<html><head></head><body></body></html>"#;
+        let dom = parser.parse(html);
+
+        assert_eq!(
+            dom,
+            NodeFactory::create_document(vec![NodeFactory::create_element(
+                "html".to_string(),
+                vec![],
+                vec![
+                    NodeFactory::create_element("head".to_string(), vec![], vec![]),
+                    NodeFactory::create_element("body".to_string(), vec![], vec![]),
+                ]
+            )])
+        );
+    }
+
+    #[test]
+    fn test_html5ever_bad_html() {
+        let parser = Html5everParser;
+        let html = r#"<body><h1 class="foo">Text &copy;</body>"#;
+        let dom = parser.parse(html);
+
+        assert_eq!(
+            dom,
+            NodeFactory::create_document(vec![NodeFactory::create_element(
+                "html".to_string(),
+                vec![],
+                vec![
+                    NodeFactory::create_element("head".to_string(), vec![], vec![]),
+                    NodeFactory::create_element(
+                        "body".to_string(),
+                        vec![],
+                        vec![NodeFactory::create_element(
+                            "h1".to_string(),
+                            vec![Attribute {
+                                name: "class".to_string(),
+                                value: "foo".to_string()
+                            }],
+                            vec![NodeFactory::create_text("Text ©".to_string())]
+                        )]
+                    ),
+                ]
+            )])
+        );
+    }
+
+    #[test]
+    fn test_html5ever_parse_with_comments() {
+        let parser = Html5everParser;
+        let html = r#"<html><!-- comment --><body></body></html>"#;
+        let dom = parser.parse(html);
+
+        assert_eq!(
+            dom,
+            NodeFactory::create_document(vec![NodeFactory::create_element(
+                "html".to_string(),
+                vec![],
+                vec![
+                    NodeFactory::create_comment(" comment ".to_string()),
+                    NodeFactory::create_element("head".to_string(), vec![], vec![]),
+                    NodeFactory::create_element("body".to_string(), vec![], vec![]),
+                ]
+            )])
+        );
+    }
+
+    #[test]
+    fn test_html5ever_full_html() {
+        let parser = Html5everParser;
+        let html = r#"<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Document</title></head><body><h1 class="foo">Text &copy;</h1></body></html>"#;
+        let dom = parser.parse(html);
+
+        assert_eq!(
+            dom,
+            NodeFactory::create_document(vec![NodeFactory::create_element(
+                "html".to_string(),
+                vec![Attribute {
+                    name: "lang".to_string(),
+                    value: "en".to_string()
+                }],
+                vec![
+                    NodeFactory::create_element(
+                        "head".to_string(),
+                        vec![],
+                        vec![
+                            NodeFactory::create_element(
+                                "meta".to_string(),
+                                vec![Attribute {
+                                    name: "charset".to_string(),
+                                    value: "UTF-8".to_string()
+                                }],
+                                vec![]
+                            ),
+                            NodeFactory::create_element(
+                                "title".to_string(),
+                                vec![],
+                                vec![NodeFactory::create_text("Document".to_string())]
+                            ),
+                        ]
+                    ),
+                    NodeFactory::create_element(
+                        "body".to_string(),
+                        vec![],
+                        vec![NodeFactory::create_element(
+                            "h1".to_string(),
+                            vec![Attribute {
+                                name: "class".to_string(),
+                                value: "foo".to_string()
+                            }],
+                            vec![NodeFactory::create_text("Text ©".to_string())]
+                        )]
+                    ),
+                ]
+            )])
+        );
+    }
+}
