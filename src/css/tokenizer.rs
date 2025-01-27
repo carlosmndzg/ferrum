@@ -546,6 +546,29 @@ impl Tokenizer {
         Token::Ident(string)
     }
 
+    fn consume_comments(&mut self) {
+        loop {
+            if !self.check_if_next_codepoints_are_and_consume("/*") {
+                break;
+            }
+
+            loop {
+                let character = self.consume_next_input_code_point();
+
+                match character {
+                    Some('*') => {
+                        if self.next_input_code_point() == Some('/') {
+                            self.consume_next_input_code_point();
+                            break;
+                        }
+                    }
+                    None => break,
+                    _ => {}
+                }
+            }
+        }
+    }
+
     fn handle_number_sign(&mut self) -> Token {
         let next_is_ident = matches!(self.next_input_code_point(), Some(c) if self.is_ident(c));
         let next_two_valid_escape = matches!(self.next_input_code_point(), Some('\\'))
@@ -646,7 +669,8 @@ impl Tokenizer {
     }
 
     pub fn next_token(&mut self) -> Token {
-        // TODO Support consuming comments
+        self.consume_comments();
+
         let character = self.consume_next_input_code_point();
 
         match character {
@@ -883,9 +907,17 @@ mod tests {
     }
 
     #[test]
+    fn test_comments() {
+        assert_eq!(
+            get_all_tokens("/* text1 */ /* text2 *//* text3 */ /* text4"),
+            vec![Token::Whitespace, Token::Whitespace, Token::Eof]
+        );
+    }
+
+    #[test]
     fn test_css_rule() {
         assert_eq!(
-            get_all_tokens("@media (min-width: 600px) { body { background-color: lightblue; } }"),
+            get_all_tokens("/*  text1   */@media (min-width: 600px)/*text2*//*text3 */ { body { background-color: lightblue; } }"),
             vec![
                 Token::AtKeyword(String::from("media")),
                 Token::Whitespace,
