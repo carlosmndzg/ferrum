@@ -3,11 +3,11 @@ use crate::css::{
     tokenizer::{Token, Tokenizer},
 };
 
-pub trait CssParser {
+pub(crate) trait CssParser {
     fn parse(&self, css: &str);
 }
 
-pub struct CssParserImpl;
+pub(crate) struct CssParserImpl;
 
 impl CssParser for CssParserImpl {
     fn parse(&self, css: &str) {

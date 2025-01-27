@@ -9,7 +9,7 @@ mod dom;
 mod html;
 
 pub struct Config {
-    pub file_path: String,
+    pub(crate) file_path: String,
 }
 
 impl Config {

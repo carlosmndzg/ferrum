@@ -1,5 +1,5 @@
 #[derive(Debug, PartialEq)]
-pub enum Node {
+pub(crate) enum Node {
     Document(Document),
     DocType(DocType),
     Comment(Comment),
@@ -8,52 +8,52 @@ pub enum Node {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Document {
-    pub children: Vec<Node>,
+pub(crate) struct Document {
+    pub(crate) children: Vec<Node>,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct DocType {
-    pub name: String,
+pub(crate) struct DocType {
+    pub(crate) name: String,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Comment {
-    pub text: String,
+pub(crate) struct Comment {
+    pub(crate) text: String,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Text {
-    pub text: String,
+pub(crate) struct Text {
+    pub(crate) text: String,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Element {
-    pub tag_name: String,
-    pub attributes: Vec<Attribute>,
-    pub children: Vec<Node>,
+pub(crate) struct Element {
+    pub(crate) tag_name: String,
+    pub(crate) attributes: Vec<Attribute>,
+    pub(crate) children: Vec<Node>,
 }
 
-pub struct NodeFactory;
+pub(crate) struct NodeFactory;
 
 impl NodeFactory {
-    pub fn create_document(children: Vec<Node>) -> Node {
+    pub(crate) fn create_document(children: Vec<Node>) -> Node {
         Node::Document(Document { children })
     }
 
-    pub fn create_doctype(name: String) -> Node {
+    pub(crate) fn create_doctype(name: String) -> Node {
         Node::DocType(DocType { name })
     }
 
-    pub fn create_comment(text: String) -> Node {
+    pub(crate) fn create_comment(text: String) -> Node {
         Node::Comment(Comment { text })
     }
 
-    pub fn create_text(text: String) -> Node {
+    pub(crate) fn create_text(text: String) -> Node {
         Node::Text(Text { text })
     }
 
-    pub fn create_element(
+    pub(crate) fn create_element(
         tag_name: String,
         attributes: Vec<Attribute>,
         children: Vec<Node>,
@@ -67,13 +67,13 @@ impl NodeFactory {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Attribute {
-    pub name: String,
-    pub value: String,
+pub(crate) struct Attribute {
+    pub(crate) name: String,
+    pub(crate) value: String,
 }
 
 // TODO Remove this function, only used for debugging
-pub fn print_dom(node: Node) {
+pub(crate) fn print_dom(node: Node) {
     match node {
         Node::Document(document) => {
             println!("Document");

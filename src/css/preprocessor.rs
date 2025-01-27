@@ -1,4 +1,4 @@
-pub fn preprocess(input: &str) -> String {
+pub(crate) fn preprocess(input: &str) -> String {
     let mut output = String::new();
     let mut chars = input.chars().peekable();
 

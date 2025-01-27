@@ -2,11 +2,11 @@ use scraper::Html;
 
 use crate::dom::{Attribute, Node, NodeFactory};
 
-pub trait HtmlParser {
+pub(crate) trait HtmlParser {
     fn parse(&self, html: &str) -> Node;
 }
 
-pub struct Html5everParser;
+pub(crate) struct Html5everParser;
 
 impl HtmlParser for Html5everParser {
     fn parse(&self, html: &str) -> Node {

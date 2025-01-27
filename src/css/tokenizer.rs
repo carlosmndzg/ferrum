@@ -3,13 +3,13 @@
 
 use std::char;
 
-pub struct Tokenizer {
+pub(crate) struct Tokenizer {
     input: Vec<char>,
     next_position: usize,
 }
 
 impl Tokenizer {
-    pub fn new(input: &str) -> Self {
+    pub(crate) fn new(input: &str) -> Self {
         Tokenizer {
             input: input.chars().collect(),
             next_position: 0,

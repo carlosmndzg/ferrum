@@ -1,2 +1,2 @@
-pub mod factory;
-pub mod parser;
+pub(crate) mod factory;
+pub(crate) mod parser;
