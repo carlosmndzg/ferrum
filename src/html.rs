@@ -1,2 +1,3 @@
-pub(crate) mod factory;
-pub(crate) mod parser;
+mod parser;
+
+pub(crate) use parser::parse;

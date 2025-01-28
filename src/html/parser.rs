@@ -2,26 +2,21 @@ use scraper::Html;
 
 use crate::dom::{Attribute, Node, NodeFactory};
 
-pub(crate) trait HtmlParser {
-    fn parse(&self, html: &str) -> Node;
+pub(crate) fn parse(html: &str) -> Node {
+    let dom = Html::parse_document(html);
+    let parser = HtmlParser;
+
+    parser.convert_dom(&dom.root_element())
 }
 
-pub(crate) struct Html5everParser;
+struct HtmlParser;
 
-impl HtmlParser for Html5everParser {
-    fn parse(&self, html: &str) -> Node {
-        let dom = Html::parse_document(html);
-
-        self.convert_dom(&dom.root_element())
-    }
-}
-
-impl Html5everParser {
+impl HtmlParser {
     fn convert_dom(&self, node: &scraper::ElementRef) -> Node {
         let mut nodes = vec![];
 
         for child in node.children() {
-            if let Some(node) = Html5everParser::traverse_and_convert(child) {
+            if let Some(node) = HtmlParser::traverse_and_convert(child) {
                 nodes.push(node);
             }
         }
@@ -43,7 +38,7 @@ impl Html5everParser {
                 let mut nodes = vec![];
 
                 for child in node.children() {
-                    if let Some(node) = Html5everParser::traverse_and_convert(child) {
+                    if let Some(node) = HtmlParser::traverse_and_convert(child) {
                         nodes.push(node);
                     }
                 }
@@ -96,9 +91,8 @@ mod tests {
 
     #[test]
     fn test_html5ever_basic_parse() {
-        let parser = Html5everParser;
         let html = r#"<html><head></head><body></body></html>"#;
-        let dom = parser.parse(html);
+        let dom = parse(html);
 
         assert_eq!(
             dom,
@@ -115,9 +109,8 @@ mod tests {
 
     #[test]
     fn test_html5ever_bad_html() {
-        let parser = Html5everParser;
         let html = r#"<body><h1 class="foo">Text &copy;</body>"#;
-        let dom = parser.parse(html);
+        let dom = parse(html);
 
         assert_eq!(
             dom,
@@ -145,9 +138,8 @@ mod tests {
 
     #[test]
     fn test_html5ever_parse_with_comments() {
-        let parser = Html5everParser;
         let html = r#"<html><!-- comment --><body></body></html>"#;
-        let dom = parser.parse(html);
+        let dom = parse(html);
 
         assert_eq!(
             dom,
@@ -165,9 +157,8 @@ mod tests {
 
     #[test]
     fn test_html5ever_full_html() {
-        let parser = Html5everParser;
         let html = r#"<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Document</title></head><body><h1 class="foo">Text &copy;</h1></body></html>"#;
-        let dom = parser.parse(html);
+        let dom = parse(html);
 
         assert_eq!(
             dom,

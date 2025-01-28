@@ -3,27 +3,19 @@ use crate::css::{
     tokenizer::{Token, Tokenizer},
 };
 
-pub(crate) trait CssParser {
-    fn parse(&self, css: &str);
-}
+pub(crate) fn parse(css: &str) {
+    let input = preprocessor::preprocess(css);
+    let mut tokenizer = Tokenizer::new(&input);
 
-pub(crate) struct CssParserImpl;
+    let mut token = tokenizer.next_token();
 
-impl CssParser for CssParserImpl {
-    fn parse(&self, css: &str) {
-        let input = preprocessor::preprocess(css);
-        let mut tokenizer = Tokenizer::new(&input);
-
-        let mut token = tokenizer.next_token();
-
-        loop {
-            if token == Token::Eof {
-                break;
-            }
-
-            println!("{:?}", token);
-
-            token = tokenizer.next_token();
+    loop {
+        if token == Token::Eof {
+            break;
         }
+
+        println!("{:?}", token);
+
+        token = tokenizer.next_token();
     }
 }

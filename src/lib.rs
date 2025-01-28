@@ -1,8 +1,6 @@
 use std::{error::Error, fs::File, io::Read};
 
-use css::parser::CssParser;
 use dom::print_dom;
-use html::parser::HtmlParser;
 
 mod css;
 mod dom;
@@ -26,11 +24,8 @@ impl Config {
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = get_file_contents(&config.file_path)?;
-    let html_parser = html::factory::create_parser();
-    let dom = html_parser.parse(&contents);
-
-    let css_parser = css::factory::create_parser();
-    css_parser.parse("@media (min-width: 600px) { body { background-color: lightblue; } }");
+    let dom = html::parse(&contents);
+    css::parse("body { background-color: lightblue; }");
 
     print_dom(dom);
 
