@@ -1,5 +1,7 @@
 use std::{error::Error, fs::File, io::Read};
 
+use dom::{Node, NodeType, Text};
+
 mod css;
 mod dom;
 mod html;
@@ -35,14 +37,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 fn get_css(dom: &dom::Node) -> &str {
     let style_node = dom::find_first_style_node(dom);
 
-    if let Some(dom::Node::Element(dom::Element {
-        tag_name, children, ..
-    })) = style_node
-    {
-        if tag_name == "style" {
-            if let Some(dom::Node::Text(dom::Text { text })) = &children.first() {
-                return text;
-            }
+    if let Some(n) = style_node {
+        if let Some(Node {
+            node_type: NodeType::Text(Text { text }),
+            ..
+        }) = &n.children.first()
+        {
+            return text;
         }
     }
 
