@@ -1,7 +1,5 @@
 use std::{error::Error, fs::File, io::Read};
 
-use dom::print_dom;
-
 mod css;
 mod dom;
 mod html;
@@ -25,11 +23,30 @@ impl Config {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = get_file_contents(&config.file_path)?;
     let dom = html::parse(&contents);
-    css::parse("body { background-color: lightblue; }");
 
-    print_dom(dom);
+    let css = get_css(&dom);
+    let stylesheet = css::parse(css);
+
+    println!("Stylesheet: {:#?}", stylesheet);
 
     Ok(())
+}
+
+fn get_css(dom: &dom::Node) -> &str {
+    let style_node = dom::find_first_style_node(dom);
+
+    if let Some(dom::Node::Element(dom::Element {
+        tag_name, children, ..
+    })) = style_node
+    {
+        if tag_name == "style" {
+            if let Some(dom::Node::Text(dom::Text { text })) = &children.first() {
+                return text;
+            }
+        }
+    }
+
+    ""
 }
 
 fn get_file_contents(file_path: &str) -> Result<String, Box<dyn Error>> {

@@ -1,5 +1,11 @@
-pub(crate) mod parser;
-pub(crate) mod preprocessor;
-pub(crate) mod tokenizer;
+use parser::CssParser;
+use types::Stylesheet;
 
-pub(crate) use parser::parse;
+pub(crate) mod parser;
+pub(crate) mod types;
+
+pub(crate) fn parse(css: &str) -> Stylesheet {
+    let mut parser = CssParser::new(css);
+
+    parser.parse()
+}

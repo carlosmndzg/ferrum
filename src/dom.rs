@@ -72,34 +72,32 @@ pub(crate) struct Attribute {
     pub(crate) value: String,
 }
 
-// TODO Remove this function, only used for debugging
-pub(crate) fn print_dom(node: Node) {
+pub(crate) fn find_first_style_node(node: &Node) -> Option<&Node> {
     match node {
         Node::Document(document) => {
-            println!("Document");
+            for child in &document.children {
+                let result = find_first_style_node(child);
 
-            for child in document.children {
-                print_dom(child);
+                if let Some(Node::Element(_)) = result {
+                    return result;
+                }
             }
         }
-        Node::DocType(doc_type) => println!("DocType {}", doc_type.name),
-        Node::Comment(comment) => println!("Comment: \"{}\"", comment.text),
-        Node::Text(text) => println!(
-            "Text \"{}\"",
-            if text.text.trim().is_empty() {
-                "\\n"
-            } else {
-                &text.text
-            }
-        ),
         Node::Element(element) => {
-            println!(
-                "Element \"{}\" | Attributes: \"{:?}\"",
-                element.tag_name, element.attributes
-            );
-            for child in element.children {
-                print_dom(child);
+            if element.tag_name == "style" {
+                return Some(node);
+            }
+
+            for child in &element.children {
+                let result = find_first_style_node(child);
+
+                if let Some(Node::Element(_)) = result {
+                    return result;
+                }
             }
         }
+        _ => {}
     }
+
+    None
 }
