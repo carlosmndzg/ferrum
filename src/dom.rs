@@ -89,20 +89,27 @@ pub(crate) struct Attribute {
     pub(crate) value: String,
 }
 
-fn is_style_node(node: &Node) -> bool {
-    matches!(&node.node_type, NodeType::Element(Element { tag_name, .. }) if tag_name == "style")
+impl Node {
+    pub(crate) fn find_first_node<'a>(&'a self, f: &impl Fn(&'a Node) -> bool) -> Option<&'a Node> {
+        if f(self) {
+            return Some(self);
+        }
+
+        for child in &self.children {
+            if let Some(n) = child.find_first_node(f) {
+                return Some(n);
+            }
+        }
+
+        None
+    }
 }
 
-pub(crate) fn find_first_style_node(node: &Node) -> Option<&Node> {
-    if is_style_node(node) {
-        return Some(node);
+impl Element {
+    pub(crate) fn get_attribute(&self, name: &str) -> Option<&str> {
+        self.attributes
+            .iter()
+            .find(|a| a.name == name)
+            .map(|a| a.value.as_str())
     }
-
-    for child in &node.children {
-        if let Some(n) = find_first_style_node(child) {
-            return Some(n);
-        }
-    }
-
-    None
 }

@@ -1,10 +1,11 @@
 use std::{error::Error, fs::File, io::Read};
 
-use dom::{Node, NodeType, Text};
+use dom::{Element, Node, NodeType, Text};
 
 mod css;
 mod dom;
 mod html;
+mod style;
 
 pub struct Config {
     pub(crate) file_path: String,
@@ -29,13 +30,16 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let css = get_css(&dom);
     let stylesheet = css::parse(css);
 
-    println!("Stylesheet: {:#?}", stylesheet);
+    let style_tree = style::build_style_tree(&dom, &stylesheet);
+
+    // println!("Stylesheet: {:#?}", stylesheet);
+    println!("Style tree: {:#?}", style_tree);
 
     Ok(())
 }
 
 fn get_css(dom: &dom::Node) -> &str {
-    let style_node = dom::find_first_style_node(dom);
+    let style_node = dom.find_first_node(&|n| is_style_node(n));
 
     if let Some(n) = style_node {
         if let Some(Node {
@@ -48,6 +52,10 @@ fn get_css(dom: &dom::Node) -> &str {
     }
 
     ""
+}
+
+fn is_style_node(node: &Node) -> bool {
+    matches!(&node.node_type, NodeType::Element(Element { tag_name, .. }) if tag_name == "style")
 }
 
 fn get_file_contents(file_path: &str) -> Result<String, Box<dyn Error>> {

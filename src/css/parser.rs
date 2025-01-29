@@ -199,14 +199,20 @@ impl CssParser {
         declarations
     }
 
-    fn consume_rule(&mut self) -> Rule {
+    fn consume_rule(&mut self) -> Vec<Rule> {
         let selectors = self.consume_selectors();
         let declarations = self.consume_declarations();
 
-        Rule {
-            selectors,
-            declarations,
+        let mut result = Vec::new();
+
+        for selector in selectors {
+            result.push(Rule {
+                selector,
+                declarations: declarations.clone(),
+            });
         }
+
+        result
     }
 
     pub(crate) fn parse(&mut self) -> Stylesheet {
@@ -221,7 +227,9 @@ impl CssParser {
                 break;
             }
 
-            stylesheet.rules.push(self.consume_rule());
+            for rule in self.consume_rule() {
+                stylesheet.rules.push(rule);
+            }
         }
 
         stylesheet
@@ -252,34 +260,56 @@ mod tests {
             Stylesheet {
                 rules: vec![
                     Rule {
-                        selectors: vec![Selector::Simple(SimpleSelector {
+                        selector: Selector::Simple(SimpleSelector {
                             tag_name: Some("p".to_string()),
                             id: None,
                             class: vec![],
-                        })],
+                        }),
                         declarations: vec![Declaration {
                             name: "color".to_string(),
                             value: Value::Keyword("red".to_string()),
                         },],
                     },
                     Rule {
-                        selectors: vec![
-                            Selector::Simple(SimpleSelector {
-                                tag_name: Some("h1".to_string()),
-                                id: None,
-                                class: vec!["title".to_string()],
-                            }),
-                            Selector::Simple(SimpleSelector {
-                                tag_name: Some("h2".to_string()),
-                                id: None,
-                                class: vec![],
-                            }),
-                            Selector::Simple(SimpleSelector {
-                                tag_name: None,
-                                id: Some("unique".to_string()),
-                                class: vec![],
-                            }),
+                        selector: Selector::Simple(SimpleSelector {
+                            tag_name: Some("h1".to_string()),
+                            id: None,
+                            class: vec!["title".to_string()],
+                        }),
+                        declarations: vec![
+                            Declaration {
+                                name: "display".to_string(),
+                                value: Value::Keyword("block".to_string()),
+                            },
+                            Declaration {
+                                name: "color".to_string(),
+                                value: Value::ColorValue(Color { r: 0, g: 0, b: 255 }),
+                            },
                         ],
+                    },
+                    Rule {
+                        selector: Selector::Simple(SimpleSelector {
+                            tag_name: Some("h2".to_string()),
+                            id: None,
+                            class: vec![],
+                        }),
+                        declarations: vec![
+                            Declaration {
+                                name: "display".to_string(),
+                                value: Value::Keyword("block".to_string()),
+                            },
+                            Declaration {
+                                name: "color".to_string(),
+                                value: Value::ColorValue(Color { r: 0, g: 0, b: 255 }),
+                            },
+                        ],
+                    },
+                    Rule {
+                        selector: Selector::Simple(SimpleSelector {
+                            tag_name: None,
+                            id: Some("unique".to_string()),
+                            class: vec![],
+                        }),
                         declarations: vec![
                             Declaration {
                                 name: "display".to_string(),
