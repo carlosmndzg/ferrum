@@ -20,22 +20,28 @@ pub(crate) fn build_style_tree<'a>(root: &'a Node, stylesheet: &'a Stylesheet) -
 
     StyledNode {
         node: html_node,
+        parent_node: None,
         styles: find_styles(html_node, stylesheet),
-        children: vec![build_style_node(body_node, stylesheet)],
+        children: vec![build_style_node(body_node, stylesheet, html_node)],
     }
 }
 
-fn build_style_node<'a>(node: &'a Node, stylesheet: &'a Stylesheet) -> StyledNode<'a> {
+fn build_style_node<'a>(
+    node: &'a Node,
+    stylesheet: &'a Stylesheet,
+    parent_node: &'a Node,
+) -> StyledNode<'a> {
     let styles = find_styles(node, stylesheet);
 
     let children = node
         .children
         .iter()
-        .map(|child| build_style_node(child, stylesheet))
+        .map(|child| build_style_node(child, stylesheet, node))
         .collect();
 
     StyledNode {
         node,
+        parent_node: Some(parent_node),
         styles,
         children,
     }
