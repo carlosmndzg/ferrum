@@ -1,11 +1,10 @@
 use core::fmt;
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 use crate::{style::properties::Property, Element, Node, NodeType};
 
 pub(crate) struct StyledNode<'a> {
     pub(crate) node: &'a Node,
-    pub(crate) parent_node: Option<&'a Node>,
     pub(crate) styles: Styles,
     pub(crate) children: Vec<StyledNode<'a>>,
 }
@@ -14,7 +13,6 @@ impl fmt::Debug for StyledNode<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("StyledNode")
             .field("node", &self.node_representation())
-            .field("parent_node", &self.parent_representation())
             .field("styles", &self.styles)
             .field("children", &self.children)
             .finish()
@@ -24,14 +22,6 @@ impl fmt::Debug for StyledNode<'_> {
 impl StyledNode<'_> {
     fn node_representation(&self) -> String {
         self.node_type_summary(&self.node.node_type)
-    }
-
-    fn parent_representation(&self) -> String {
-        if let Some(parent) = self.parent_node {
-            self.node_type_summary(&parent.node_type)
-        } else {
-            "null".to_string()
-        }
     }
 
     fn node_type_summary(&self, node_type: &NodeType) -> String {
@@ -45,19 +35,29 @@ impl StyledNode<'_> {
 
 #[derive(Debug, Default)]
 pub(crate) struct Styles {
-    properties: Vec<Box<dyn Property>>,
-    styles_added: HashSet<String>,
+    properties: HashMap<String, Property>,
 }
 
 impl Styles {
-    pub(crate) fn add_property(&mut self, property: Box<dyn Property>) {
+    pub(crate) fn add_property(&mut self, property: Property) {
         let name = property.name().to_string();
 
-        if self.styles_added.contains(&name) {
+        if self.properties.contains_key(&name) {
             return;
         }
 
-        self.properties.push(property);
-        self.styles_added.insert(name);
+        self.properties.insert(name, property);
+    }
+
+    pub(crate) fn get_property_clone(&self, name: &str) -> Option<Property> {
+        if !self.properties.contains_key(name) {
+            return None;
+        }
+
+        Some(self.properties.get(name).cloned().unwrap())
+    }
+
+    pub(crate) fn has_property(&self, name: &str) -> bool {
+        self.properties.contains_key(name)
     }
 }
