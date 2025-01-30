@@ -102,6 +102,7 @@ impl CssParser {
                 Some('.') => {
                     simple_selector.class.push(self.consume_identifier());
                 }
+                Some('*') => {}
                 _ => {
                     self.reconsume_current_code_point();
                     simple_selector.tag_name = Some(self.consume_identifier());
