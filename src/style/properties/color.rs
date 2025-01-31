@@ -15,7 +15,7 @@ impl Color {
             return Color::convert_keyword_to_color(keyword);
         }
 
-        if let Value::ColorValue(color) = value {
+        if let Value::Color(color) = value {
             return color.into();
         }
 

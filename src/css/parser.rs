@@ -75,7 +75,7 @@ impl CssParser {
     }
 
     fn consume_identifier(&mut self) -> String {
-        self.consume_until_and_return(|c| !c.is_alphanumeric())
+        self.consume_until_and_return(|c| !c.is_alphanumeric() && c != '-')
     }
 
     fn consume_selector(&mut self) -> Selector {
@@ -153,7 +153,20 @@ impl CssParser {
             let b = self.consume_number();
             self.consume_next_code_point();
 
-            Value::ColorValue(Color { r, g, b })
+            Value::Color(Color { r, g, b })
+        } else if matches!(self.next_code_point(), Some(c) if c.is_ascii_digit()) {
+            let number = self.consume_number();
+
+            match self.next_code_point() {
+                Some('%') => {
+                    self.consume_next_code_point();
+                    Value::Percentage(number as f32)
+                }
+                _ => {
+                    let unit = self.consume_identifier();
+                    Value::Dimension(number as f32, unit)
+                }
+            }
         } else {
             Value::Keyword(self.consume_until_and_return(|c| !c.is_alphabetic()))
         }
@@ -253,6 +266,8 @@ mod tests {
             "
             p {
                 color: red;
+                width: 100%;
+                margin-left: 4px;
             }
 
             h1.title, h2, #unique {
@@ -272,10 +287,20 @@ mod tests {
                             id: None,
                             class: vec![],
                         }),
-                        declarations: vec![Declaration {
-                            name: "color".to_string(),
-                            value: Value::Keyword("red".to_string()),
-                        },],
+                        declarations: vec![
+                            Declaration {
+                                name: "color".to_string(),
+                                value: Value::Keyword("red".to_string()),
+                            },
+                            Declaration {
+                                name: "width".to_string(),
+                                value: Value::Percentage(100.0),
+                            },
+                            Declaration {
+                                name: "margin-left".to_string(),
+                                value: Value::Dimension(4.0, "px".to_string()),
+                            }
+                        ],
                     },
                     Rule {
                         selector: Selector::Simple(SimpleSelector {
@@ -290,7 +315,7 @@ mod tests {
                             },
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::ColorValue(Color { r: 0, g: 0, b: 255 }),
+                                value: Value::Color(Color { r: 0, g: 0, b: 255 }),
                             },
                         ],
                     },
@@ -307,7 +332,7 @@ mod tests {
                             },
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::ColorValue(Color { r: 0, g: 0, b: 255 }),
+                                value: Value::Color(Color { r: 0, g: 0, b: 255 }),
                             },
                         ],
                     },
@@ -324,7 +349,7 @@ mod tests {
                             },
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::ColorValue(Color { r: 0, g: 0, b: 255 }),
+                                value: Value::Color(Color { r: 0, g: 0, b: 255 }),
                             },
                         ],
                     },

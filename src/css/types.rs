@@ -34,7 +34,9 @@ pub(crate) struct Declaration {
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) enum Value {
     Keyword(String),
-    ColorValue(Color),
+    Color(Color),
+    Dimension(f32, String),
+    Percentage(f32),
 }
 
 #[derive(Debug, PartialEq, Clone)]
