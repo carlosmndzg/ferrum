@@ -61,3 +61,8 @@ impl Styles {
         self.properties.contains_key(name)
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) enum Unit {
+    Px,
+}
