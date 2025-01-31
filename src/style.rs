@@ -183,7 +183,9 @@ mod tests {
             .get_property_clone("color")
             .expect("Expected a color property");
 
-        let Property::Color(color) = color;
+        let Property::Color(color) = color else {
+            panic!("Expected a color property");
+        };
 
         // Div node color
         assert_eq!(color, Color { r: 0, g: 0, b: 0 });
@@ -193,7 +195,10 @@ mod tests {
         let Property::Color(color) = p_node
             .styles
             .get_property_clone("color")
-            .expect("Expected a color property");
+            .expect("Expected a color property")
+        else {
+            panic!("Expected a color property");
+        };
 
         // P node color
         assert_eq!(
@@ -213,7 +218,10 @@ mod tests {
         let Property::Color(color) = text_node
             .styles
             .get_property_clone("color")
-            .expect("Expected a color property");
+            .expect("Expected a color property")
+        else {
+            panic!("Expected a color property");
+        };
 
         // Text node color
         assert_eq!(
