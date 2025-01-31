@@ -34,6 +34,18 @@ impl CssParser {
         self.next_pos -= 1;
     }
 
+    fn create_color_from_i32(&self, r: i32, g: i32, b: i32) -> Value {
+        if !(0..=255).contains(&r) || !(0..=255).contains(&g) || !(0..=255).contains(&b) {
+            panic!("Invalid color values");
+        }
+
+        Value::Color(Color {
+            r: r as u8,
+            g: g as u8,
+            b: b as u8,
+        })
+    }
+
     fn consume_if_starts(&mut self, s: &str) -> bool {
         let chars = s.chars();
 
@@ -137,7 +149,7 @@ impl CssParser {
         selectors
     }
 
-    fn consume_number(&mut self) -> u8 {
+    fn consume_number(&mut self) -> i32 {
         self.consume_until(|c| !c.is_whitespace());
         self.consume_until_and_return(|c| !c.is_numeric())
             .parse()
@@ -153,7 +165,7 @@ impl CssParser {
             let b = self.consume_number();
             self.consume_next_code_point();
 
-            Value::Color(Color { r, g, b })
+            self.create_color_from_i32(r, g, b)
         } else if matches!(self.next_code_point(), Some(c) if c.is_ascii_digit()) {
             let number = self.consume_number();
 

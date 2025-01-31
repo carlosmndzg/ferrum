@@ -9,7 +9,11 @@ use crate::{
 pub(crate) mod properties;
 pub(crate) mod types;
 
-pub(crate) fn build_style_tree<'a>(root: &'a Node, stylesheet: &'a Stylesheet) -> StyledNode<'a> {
+pub(crate) fn build_style_tree<'a>(
+    root: &'a Node,
+    stylesheet: &'a Stylesheet,
+    user_agent_stylesheet: &'a Stylesheet,
+) -> StyledNode<'a> {
     let html_node = root
         .find_first_node(&|n| is_tag_node(n, "html"))
         .expect("No <html> node found in the DOM");
@@ -18,8 +22,13 @@ pub(crate) fn build_style_tree<'a>(root: &'a Node, stylesheet: &'a Stylesheet) -
         .find_first_node(&|n| is_tag_node(n, "body"))
         .expect("No <body> node found in the DOM");
 
-    let styles = find_styles(html_node, stylesheet, None);
-    let children = vec![build_style_node(body_node, stylesheet, Some(&styles))];
+    let styles = find_styles(html_node, stylesheet, user_agent_stylesheet, None);
+    let children = vec![build_style_node(
+        body_node,
+        stylesheet,
+        user_agent_stylesheet,
+        Some(&styles),
+    )];
 
     StyledNode {
         node: html_node,
@@ -31,14 +40,15 @@ pub(crate) fn build_style_tree<'a>(root: &'a Node, stylesheet: &'a Stylesheet) -
 fn build_style_node<'a>(
     node: &'a Node,
     stylesheet: &'a Stylesheet,
+    user_agent_stylesheet: &'a Stylesheet,
     parent_styles: Option<&Styles>,
 ) -> StyledNode<'a> {
-    let styles = find_styles(node, stylesheet, parent_styles);
+    let styles = find_styles(node, stylesheet, user_agent_stylesheet, parent_styles);
 
     let children = node
         .children
         .iter()
-        .map(|child| build_style_node(child, stylesheet, Some(&styles)))
+        .map(|child| build_style_node(child, stylesheet, user_agent_stylesheet, Some(&styles)))
         .collect();
 
     StyledNode {
@@ -55,6 +65,7 @@ fn is_tag_node(node: &Node, tag: &str) -> bool {
 fn find_styles<'a>(
     node: &'a Node,
     stylesheet: &'a Stylesheet,
+    user_agent_stylesheet: &'a Stylesheet,
     parent_styles: Option<&'a Styles>,
 ) -> Styles {
     let mut styles = Styles::default();
@@ -74,6 +85,18 @@ fn find_styles<'a>(
 
     // Cascade values
     for rule in rules {
+        for declaration in &rule.declarations {
+            if let Some(property) = PropertyFactory::create_property(declaration) {
+                styles.add_property(property);
+            }
+        }
+    }
+
+    // User agent values
+    let ua_rules = find_matching_rules(node, user_agent_stylesheet);
+    let ua_rules = sort_rules_by_specificity(ua_rules);
+
+    for rule in ua_rules {
         for declaration in &rule.declarations {
             if let Some(property) = PropertyFactory::create_property(declaration) {
                 styles.add_property(property);
@@ -200,7 +223,9 @@ mod tests {
             }],
         };
 
-        let styled_node = build_style_node(&node, &stylesheet, None);
+        let ua_stylesheet = Stylesheet { rules: vec![] };
+
+        let styled_node = build_style_node(&node, &stylesheet, &ua_stylesheet, None);
 
         let color = styled_node
             .styles

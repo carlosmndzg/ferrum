@@ -1,0 +1,43 @@
+html {
+    display: block;
+    font-size: 16px;
+}
+
+body {
+    display: block;
+    margin: 8px;
+}
+
+p, div, article, aside, footer, header, hgroup, main, nav, search, section {
+    display: block;
+}
+
+h1 {
+    display: block;
+    font-size: 32px;
+}
+
+h2 {
+    display: block;
+    font-size: 24px;
+}
+
+h3 {
+    display: block;
+    font-size: 20px;
+}
+
+h4 {
+    display: block;
+    font-size: 16px;
+}
+
+h5 {
+    display: block;
+    font-size: 14px;
+}
+
+h6 {
+    display: block;
+    font-size: 12px;
+}

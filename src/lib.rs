@@ -2,6 +2,8 @@ use std::{error::Error, fs::File, io::Read};
 
 use dom::{Element, Node, NodeType, Text};
 
+const USER_AGENT_STYLESHEET: &str = include_str!("../assets/default.css");
+
 mod css;
 mod dom;
 mod html;
@@ -29,8 +31,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     let css = get_css(&dom);
     let stylesheet = css::parse(css);
+    let user_agent_stylesheet = css::parse(USER_AGENT_STYLESHEET);
 
-    let style_tree = style::build_style_tree(&dom, &stylesheet);
+    let style_tree = style::build_style_tree(&dom, &stylesheet, &user_agent_stylesheet);
 
     println!("Style tree: {:#?}", style_tree);
 
