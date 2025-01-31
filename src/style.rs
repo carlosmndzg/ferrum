@@ -2,7 +2,7 @@ use properties::{PropertyFactory, AVAILABLE_PROPERTIES, INHERITABLE_PROPERTIES};
 use types::{StyledNode, Styles};
 
 use crate::{
-    css::types::{Rule, Stylesheet},
+    css::types::{Declaration, Rule, Stylesheet},
     Element, Node, NodeType,
 };
 
@@ -59,6 +59,15 @@ fn find_styles<'a>(
 ) -> Styles {
     let mut styles = Styles::default();
 
+    // Apply styles for "style" attribute
+    let style_attribute_declarations = find_style_attribute_declarations(node);
+
+    for declaration in style_attribute_declarations {
+        if let Some(property) = PropertyFactory::create_property(&declaration) {
+            styles.add_property(property);
+        }
+    }
+
     // Declared values
     let rules = find_matching_rules(node, stylesheet);
     let rules = sort_rules_by_specificity(rules);
@@ -89,6 +98,21 @@ fn find_styles<'a>(
     }
 
     styles
+}
+
+fn find_style_attribute_declarations(node: &Node) -> Vec<Declaration> {
+    if let NodeType::Element(element) = &node.node_type {
+        if let Some(style) = element.get_attribute("style") {
+            let mut declarations = crate::css::parse_list_of_declarations(style);
+
+            // We reverse it because we want to apply the last declaration first
+            declarations.reverse();
+
+            return declarations;
+        }
+    }
+
+    Vec::new()
 }
 
 fn find_matching_rules<'a>(node: &'a Node, stylesheet: &'a Stylesheet) -> Vec<&'a Rule> {

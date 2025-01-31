@@ -155,7 +155,7 @@ impl CssParser {
 
             Value::ColorValue(Color { r, g, b })
         } else {
-            Value::Keyword(self.consume_until_and_return(|c| c == ';'))
+            Value::Keyword(self.consume_until_and_return(|c| !c.is_alphabetic()))
         }
     }
 
@@ -174,7 +174,9 @@ impl CssParser {
 
         let value = self.consume_value();
 
-        if self.consume_next_code_point() != Some(';') {
+        self.consume_until(|c| !c.is_whitespace());
+
+        if !matches!(self.consume_next_code_point(), Some(';') | None) {
             panic!("Expected ';'");
         }
 
@@ -234,6 +236,10 @@ impl CssParser {
         }
 
         stylesheet
+    }
+
+    pub(crate) fn parse_list_of_declarations(&mut self) -> Vec<Declaration> {
+        self.consume_declarations()
     }
 }
 
