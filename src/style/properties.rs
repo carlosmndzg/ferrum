@@ -3,17 +3,21 @@ use color::Color;
 use display::Display;
 use font_size::FontSize;
 use height::Height;
+use margin::Margin;
+use padding::Padding;
 use width::Width;
 
 use crate::css::types::Declaration;
 
-pub(crate) const AVAILABLE_PROPERTIES: [&str; 6] = [
+pub(crate) const AVAILABLE_PROPERTIES: [&str; 8] = [
     "color",
     "display",
     "width",
     "height",
     "font-size",
     "background-color",
+    "padding",
+    "margin",
 ];
 pub(crate) const INHERITABLE_PROPERTIES: [&str; 2] = ["color", "font-size"];
 
@@ -22,6 +26,8 @@ pub(crate) mod color;
 pub(crate) mod display;
 pub(crate) mod font_size;
 pub(crate) mod height;
+pub(crate) mod margin;
+pub(crate) mod padding;
 pub(crate) mod width;
 
 pub(crate) struct PropertyFactory;
@@ -37,6 +43,8 @@ impl PropertyFactory {
             "background-color" => Some(Property::BackgroundColor(BackgroundColor::maybe_new(
                 &declaration.value,
             )?)),
+            "padding" => Some(Property::Padding(Padding::maybe_new(&declaration.value)?)),
+            "margin" => Some(Property::Margin(Margin::maybe_new(&declaration.value)?)),
             _ => None,
         }
     }
@@ -49,6 +57,8 @@ impl PropertyFactory {
             "height" => Property::Height(Height::default()),
             "font-size" => Property::FontSize(FontSize::default()),
             "background-color" => Property::BackgroundColor(BackgroundColor::default()),
+            "padding" => Property::Padding(Padding::default()),
+            "margin" => Property::Margin(Margin::default()),
             _ => panic!("Unknown property \"{}\"", name),
         }
     }
@@ -62,6 +72,8 @@ pub(crate) enum Property {
     Height(Height),
     FontSize(FontSize),
     BackgroundColor(BackgroundColor),
+    Padding(Padding),
+    Margin(Margin),
 }
 
 impl Property {
@@ -73,6 +85,8 @@ impl Property {
             Property::Height(height) => height.name(),
             Property::FontSize(font_size) => font_size.name(),
             Property::BackgroundColor(background_color) => background_color.name(),
+            Property::Padding(padding) => padding.name(),
+            Property::Margin(margin) => margin.name(),
         }
     }
 }
