@@ -160,7 +160,7 @@ mod tests {
     use crate::{
         css::types::{Declaration, Selector, SimpleSelector, Value},
         dom::Attribute,
-        style::properties::color::Color,
+        style::{properties::color::Color, types::Rgb},
         Text,
     };
 
@@ -237,7 +237,12 @@ mod tests {
         };
 
         // Div node color
-        assert_eq!(color, Color { r: 0, g: 0, b: 0 });
+        assert_eq!(
+            color,
+            Color {
+                value: Rgb { r: 0, g: 0, b: 0 }
+            }
+        );
 
         let p_node = styled_node.children.first().expect("Expected child p node");
 
@@ -253,9 +258,11 @@ mod tests {
         assert_eq!(
             color,
             Color {
-                r: 127,
-                g: 255,
-                b: 212,
+                value: Rgb {
+                    r: 127,
+                    g: 255,
+                    b: 212
+                }
             }
         );
 
@@ -276,9 +283,11 @@ mod tests {
         assert_eq!(
             color,
             Color {
-                r: 127,
-                g: 255,
-                b: 212,
+                value: Rgb {
+                    r: 127,
+                    g: 255,
+                    b: 212
+                }
             }
         );
     }

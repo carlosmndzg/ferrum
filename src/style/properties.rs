@@ -1,15 +1,26 @@
+use background_color::BackgroundColor;
 use color::Color;
 use display::Display;
+use font_size::FontSize;
 use height::Height;
 use width::Width;
 
 use crate::css::types::Declaration;
 
-pub(crate) const AVAILABLE_PROPERTIES: [&str; 4] = ["color", "display", "width", "height"];
-pub(crate) const INHERITABLE_PROPERTIES: [&str; 1] = ["color"];
+pub(crate) const AVAILABLE_PROPERTIES: [&str; 6] = [
+    "color",
+    "display",
+    "width",
+    "height",
+    "font-size",
+    "background-color",
+];
+pub(crate) const INHERITABLE_PROPERTIES: [&str; 2] = ["color", "font-size"];
 
+pub(crate) mod background_color;
 pub(crate) mod color;
 pub(crate) mod display;
+pub(crate) mod font_size;
 pub(crate) mod height;
 pub(crate) mod width;
 
@@ -22,6 +33,10 @@ impl PropertyFactory {
             "display" => Some(Property::Display(Display::maybe_new(&declaration.value)?)),
             "width" => Some(Property::Width(Width::maybe_new(&declaration.value)?)),
             "height" => Some(Property::Height(Height::maybe_new(&declaration.value)?)),
+            "font-size" => Some(Property::FontSize(FontSize::maybe_new(&declaration.value)?)),
+            "background-color" => Some(Property::BackgroundColor(BackgroundColor::maybe_new(
+                &declaration.value,
+            )?)),
             _ => None,
         }
     }
@@ -32,6 +47,8 @@ impl PropertyFactory {
             "display" => Property::Display(Display::default()),
             "width" => Property::Width(Width::default()),
             "height" => Property::Height(Height::default()),
+            "font-size" => Property::FontSize(FontSize::default()),
+            "background-color" => Property::BackgroundColor(BackgroundColor::default()),
             _ => panic!("Unknown property \"{}\"", name),
         }
     }
@@ -43,6 +60,8 @@ pub(crate) enum Property {
     Display(Display),
     Width(Width),
     Height(Height),
+    FontSize(FontSize),
+    BackgroundColor(BackgroundColor),
 }
 
 impl Property {
@@ -52,13 +71,15 @@ impl Property {
             Property::Display(display) => display.name(),
             Property::Width(width) => width.name(),
             Property::Height(height) => height.name(),
+            Property::FontSize(font_size) => font_size.name(),
+            Property::BackgroundColor(background_color) => background_color.name(),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::css::types::Value;
+    use crate::{css::types::Value, style::types::Rgb};
 
     use super::*;
 
@@ -72,9 +93,13 @@ mod tests {
         let property = PropertyFactory::create_property(&declaration);
 
         if let Some(property) = property {
-            let Property::Color(Color { r, g, b }) = property else {
-                panic!("Expected a color property");
+            let Property::Color(Color {
+                value: Rgb { r, g, b },
+            }) = property
+            else {
+                panic!("Expected a property to be created");
             };
+
             assert_eq!(r, 255);
             assert_eq!(g, 0);
             assert_eq!(b, 0);
