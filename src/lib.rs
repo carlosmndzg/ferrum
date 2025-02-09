@@ -7,6 +7,7 @@ const USER_AGENT_STYLESHEET: &str = include_str!("../assets/default.css");
 mod css;
 mod dom;
 mod html;
+mod layout;
 mod style;
 
 pub struct Config {
@@ -35,7 +36,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     let style_tree = style::build_style_tree(&dom, &stylesheet, &user_agent_stylesheet);
 
+    let layout_tree = layout::build_layout_tree(&style_tree, (800.0, 600.0));
+
     println!("Style tree: {:#?}", style_tree);
+    println!("Layout tree: {:#?}", layout_tree);
 
     Ok(())
 }
