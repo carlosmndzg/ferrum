@@ -52,13 +52,23 @@ impl PropertyFactory {
             "width" => Some(Property::Width(Width::maybe_new(&declaration.value)?)),
             "height" => Some(Property::Height(Height::maybe_new(&declaration.value)?)),
             "font-size" => Some(Property::FontSize(FontSize::maybe_new(&declaration.value)?)),
-            "background-color" => Some(Property::BackgroundColor(BackgroundColor::maybe_new(&declaration.value)?)),
+            "background-color" => Some(Property::BackgroundColor(BackgroundColor::maybe_new(
+                &declaration.value,
+            )?)),
             "padding" => Some(Property::Padding(Padding::maybe_new(&declaration.value)?)),
             "margin" => Some(Property::Margin(Margin::maybe_new(&declaration.value)?)),
-            "margin-top" => Some(Property::MarginTop(MarginTop::maybe_new(&declaration.value)?)),
-            "margin-right" => Some(Property::MarginRight(MarginRight::maybe_new(&declaration.value)?)),
-            "margin-bottom" => Some(Property::MarginBottom(MarginBottom::maybe_new(&declaration.value)?)),
-            "margin-left" => Some(Property::MarginLeft(MarginLeft::maybe_new(&declaration.value)?)),
+            "margin-top" => Some(Property::MarginTop(MarginTop::maybe_new(
+                &declaration.value,
+            )?)),
+            "margin-right" => Some(Property::MarginRight(MarginRight::maybe_new(
+                &declaration.value,
+            )?)),
+            "margin-bottom" => Some(Property::MarginBottom(MarginBottom::maybe_new(
+                &declaration.value,
+            )?)),
+            "margin-left" => Some(Property::MarginLeft(MarginLeft::maybe_new(
+                &declaration.value,
+            )?)),
             _ => None,
         }
     }
