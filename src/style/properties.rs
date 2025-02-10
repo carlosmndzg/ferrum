@@ -4,12 +4,16 @@ use display::Display;
 use font_size::FontSize;
 use height::Height;
 use margin::Margin;
+use margin_bottom::MarginBottom;
+use margin_left::MarginLeft;
+use margin_right::MarginRight;
+use margin_top::MarginTop;
 use padding::Padding;
 use width::Width;
 
 use crate::css::types::Declaration;
 
-pub(crate) const AVAILABLE_PROPERTIES: [&str; 8] = [
+pub(crate) const AVAILABLE_PROPERTIES: [&str; 12] = [
     "color",
     "display",
     "width",
@@ -18,6 +22,10 @@ pub(crate) const AVAILABLE_PROPERTIES: [&str; 8] = [
     "background-color",
     "padding",
     "margin",
+    "margin-top",
+    "margin-right",
+    "margin-bottom",
+    "margin-left",
 ];
 pub(crate) const INHERITABLE_PROPERTIES: [&str; 2] = ["color", "font-size"];
 
@@ -27,6 +35,10 @@ pub(crate) mod display;
 pub(crate) mod font_size;
 pub(crate) mod height;
 pub(crate) mod margin;
+pub(crate) mod margin_bottom;
+pub(crate) mod margin_left;
+pub(crate) mod margin_right;
+pub(crate) mod margin_top;
 pub(crate) mod padding;
 pub(crate) mod width;
 
@@ -40,11 +52,13 @@ impl PropertyFactory {
             "width" => Some(Property::Width(Width::maybe_new(&declaration.value)?)),
             "height" => Some(Property::Height(Height::maybe_new(&declaration.value)?)),
             "font-size" => Some(Property::FontSize(FontSize::maybe_new(&declaration.value)?)),
-            "background-color" => Some(Property::BackgroundColor(BackgroundColor::maybe_new(
-                &declaration.value,
-            )?)),
+            "background-color" => Some(Property::BackgroundColor(BackgroundColor::maybe_new(&declaration.value)?)),
             "padding" => Some(Property::Padding(Padding::maybe_new(&declaration.value)?)),
             "margin" => Some(Property::Margin(Margin::maybe_new(&declaration.value)?)),
+            "margin-top" => Some(Property::MarginTop(MarginTop::maybe_new(&declaration.value)?)),
+            "margin-right" => Some(Property::MarginRight(MarginRight::maybe_new(&declaration.value)?)),
+            "margin-bottom" => Some(Property::MarginBottom(MarginBottom::maybe_new(&declaration.value)?)),
+            "margin-left" => Some(Property::MarginLeft(MarginLeft::maybe_new(&declaration.value)?)),
             _ => None,
         }
     }
@@ -59,6 +73,10 @@ impl PropertyFactory {
             "background-color" => Property::BackgroundColor(BackgroundColor::default()),
             "padding" => Property::Padding(Padding::default()),
             "margin" => Property::Margin(Margin::default()),
+            "margin-top" => Property::MarginTop(MarginTop::default()),
+            "margin-right" => Property::MarginRight(MarginRight::default()),
+            "margin-bottom" => Property::MarginBottom(MarginBottom::default()),
+            "margin-left" => Property::MarginLeft(MarginLeft::default()),
             _ => panic!("Unknown property \"{}\"", name),
         }
     }
@@ -74,6 +92,10 @@ pub(crate) enum Property {
     BackgroundColor(BackgroundColor),
     Padding(Padding),
     Margin(Margin),
+    MarginTop(MarginTop),
+    MarginRight(MarginRight),
+    MarginBottom(MarginBottom),
+    MarginLeft(MarginLeft),
 }
 
 impl Property {
@@ -87,6 +109,10 @@ impl Property {
             Property::BackgroundColor(background_color) => background_color.name(),
             Property::Padding(padding) => padding.name(),
             Property::Margin(margin) => margin.name(),
+            Property::MarginTop(margin_top) => margin_top.name(),
+            Property::MarginRight(margin_right) => margin_right.name(),
+            Property::MarginBottom(margin_bottom) => margin_bottom.name(),
+            Property::MarginLeft(margin_left) => margin_left.name(),
         }
     }
 }
