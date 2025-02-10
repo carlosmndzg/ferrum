@@ -3,6 +3,9 @@ use std::collections::HashMap;
 
 use crate::{style::properties::Property, Element, Node, NodeType};
 
+use super::properties::display::Display;
+
+#[derive(PartialEq)]
 pub(crate) struct StyledNode<'a> {
     pub(crate) node: &'a Node,
     pub(crate) styles: Styles,
@@ -31,9 +34,29 @@ impl StyledNode<'_> {
             _ => String::new(),
         }
     }
+
+    pub(crate) fn display(&self) -> &Display {
+        if let Some(Property::Display(display)) = self.styles.get_property("display") {
+            return display;
+        }
+
+        panic!("Display property not found");
+    }
+
+    pub(crate) fn has_display_none(&self) -> bool {
+        self.display() == &Display::None
+    }
+
+    pub(crate) fn is_block_level(&self) -> bool {
+        self.display() == &Display::Block
+    }
+
+    pub(crate) fn is_inline_level(&self) -> bool {
+        self.display() == &Display::Inline
+    }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq)]
 pub(crate) struct Styles {
     properties: HashMap<String, Property>,
 }
@@ -59,6 +82,10 @@ impl Styles {
 
     pub(crate) fn has_property(&self, name: &str) -> bool {
         self.properties.contains_key(name)
+    }
+
+    pub(crate) fn get_property(&self, name: &str) -> Option<&Property> {
+        self.properties.get(name)
     }
 }
 

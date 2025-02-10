@@ -103,6 +103,13 @@ impl Node {
 
         None
     }
+
+    pub(crate) fn is_only_whitespace(&self) -> bool {
+        match &self.node_type {
+            NodeType::Text(t) => t.text.trim().is_empty(),
+            _ => false,
+        }
+    }
 }
 
 impl Element {

@@ -6,8 +6,10 @@ use crate::style::types::StyledNode;
 mod tree_builder;
 mod types;
 
-pub fn build_layout_tree(style_tree: &StyledNode, dimensions: (f32, f32)) -> LayoutNode {
+pub fn build_layout_tree<'a>(style_tree: &'a StyledNode, dimensions: (f32, f32)) -> LayoutNode<'a> {
     let mut layout_tree_builder = LayoutTreeBuilder::new(dimensions);
 
-    layout_tree_builder.build(style_tree)
+    let root = layout_tree_builder.build(style_tree);
+
+    root
 }
