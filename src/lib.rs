@@ -8,6 +8,7 @@ mod css;
 mod dom;
 mod html;
 mod layout;
+mod painter;
 mod style;
 
 pub struct Config {
@@ -38,8 +39,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     let layout_tree = layout::build_layout_tree(&style_tree, (800.0, 600.0));
 
-    // println!("Style tree: {:#?}", style_tree);
     println!("Layout tree: {:#?}", layout_tree);
+
+    painter::paint(&layout_tree);
 
     Ok(())
 }
