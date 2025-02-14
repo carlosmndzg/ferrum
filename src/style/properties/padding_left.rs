@@ -28,4 +28,13 @@ impl PaddingLeft {
     pub(crate) fn default() -> PaddingLeft {
         PaddingLeft::Length(0.0, Unit::Px)
     }
+
+    pub(crate) fn actual_value(&self, parent_width: f32) -> f32 {
+        match self {
+            PaddingLeft::Length(length, unit) => match unit {
+                Unit::Px => *length,
+            },
+            PaddingLeft::Percentage(percentage) => parent_width * percentage / 100.0,
+        }
+    }
 }

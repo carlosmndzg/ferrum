@@ -35,4 +35,18 @@ impl Height {
     pub(crate) fn default() -> Height {
         Height::Auto
     }
+
+    pub(crate) fn is_auto(&self) -> bool {
+        matches!(self, Height::Auto)
+    }
+
+    pub(crate) fn actual_value(&self, parent_height: f32) -> f32 {
+        match self {
+            Height::Auto => 0.0,
+            Height::Length(length, unit) => match unit {
+                Unit::Px => *length,
+            },
+            Height::Percentage(percentage) => parent_height * percentage / 100.0,
+        }
+    }
 }

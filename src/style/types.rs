@@ -2,7 +2,12 @@ use core::fmt;
 use std::collections::HashMap;
 
 use crate::{
-    style::properties::{width::Width, Property},
+    style::properties::{
+        height::Height, margin_bottom::MarginBottom, margin_left::MarginLeft,
+        margin_right::MarginRight, margin_top::MarginTop, padding_bottom::PaddingBottom,
+        padding_left::PaddingLeft, padding_right::PaddingRight, padding_top::PaddingTop,
+        width::Width, Property,
+    },
     Element, Node, NodeType,
 };
 
@@ -29,8 +34,9 @@ macro_rules! generate_property_getter {
     ($name:ident, $property_type:ident) => {
         #[allow(unused)]
         pub(crate) fn $name(&self) -> &$property_type {
-            if let Some(Property::$property_type(value)) =
-                self.styles.get_property(stringify!($name))
+            let property_name = stringify!($name).replace('_', "-");
+
+            if let Some(Property::$property_type(value)) = self.styles.get_property(&property_name)
             {
                 return &value;
             }
@@ -67,6 +73,15 @@ impl StyledNode<'_> {
 
     generate_property_getter!(display, Display);
     generate_property_getter!(width, Width);
+    generate_property_getter!(height, Height);
+    generate_property_getter!(margin_top, MarginTop);
+    generate_property_getter!(margin_right, MarginRight);
+    generate_property_getter!(margin_bottom, MarginBottom);
+    generate_property_getter!(margin_left, MarginLeft);
+    generate_property_getter!(padding_top, PaddingTop);
+    generate_property_getter!(padding_right, PaddingRight);
+    generate_property_getter!(padding_bottom, PaddingBottom);
+    generate_property_getter!(padding_left, PaddingLeft);
 }
 
 #[derive(Debug, Default, PartialEq)]

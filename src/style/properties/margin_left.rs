@@ -35,4 +35,18 @@ impl MarginLeft {
     pub(crate) fn default() -> MarginLeft {
         MarginLeft::Length(0.0, Unit::Px)
     }
+
+    pub(crate) fn is_auto(&self) -> bool {
+        matches!(self, MarginLeft::Auto)
+    }
+
+    pub(crate) fn actual_value(&self, parent_width: f32) -> f32 {
+        match self {
+            MarginLeft::Auto => 0.0,
+            MarginLeft::Length(length, unit) => match unit {
+                Unit::Px => *length,
+            },
+            MarginLeft::Percentage(percentage) => parent_width * percentage / 100.0,
+        }
+    }
 }

@@ -14,6 +14,7 @@ impl fmt::Debug for LayoutNode<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("LayoutNode")
             .field("box_type", &self.box_type.box_representation())
+            .field("box_dimensions", &self.box_dimensions)
             .field("children", &self.children)
             .finish()
     }
@@ -48,7 +49,7 @@ pub(crate) struct EdgeSizes {
 
 #[derive(Debug, Default, PartialEq)]
 pub(crate) enum BoxType<'a> {
-    Block(&'a StyledNode<'a>),
+    Block(&'a StyledNode<'a>, FormattingContext),
     Inline(&'a StyledNode<'a>),
     #[default]
     Anonymous,
@@ -57,7 +58,7 @@ pub(crate) enum BoxType<'a> {
 impl BoxType<'_> {
     pub(crate) fn box_representation(&self) -> String {
         match self {
-            BoxType::Block(node) => {
+            BoxType::Block(node, ..) => {
                 let node_type = &node.node.node_type;
 
                 if let NodeType::Element(e) = node_type {
@@ -82,4 +83,10 @@ impl BoxType<'_> {
             BoxType::Anonymous => "Anonymous".to_string(),
         }
     }
+}
+
+#[derive(Debug, PartialEq)]
+pub(crate) enum FormattingContext {
+    Block,
+    Inline,
 }

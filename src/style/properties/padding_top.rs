@@ -28,4 +28,13 @@ impl PaddingTop {
     pub(crate) fn default() -> PaddingTop {
         PaddingTop::Length(0.0, Unit::Px)
     }
+
+    pub(crate) fn actual_value(&self, parent_width: f32) -> f32 {
+        match self {
+            PaddingTop::Length(length, unit) => match unit {
+                Unit::Px => *length,
+            },
+            PaddingTop::Percentage(percentage) => parent_width * percentage / 100.0,
+        }
+    }
 }

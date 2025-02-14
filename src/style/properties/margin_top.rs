@@ -35,4 +35,14 @@ impl MarginTop {
     pub(crate) fn default() -> MarginTop {
         MarginTop::Length(0.0, Unit::Px)
     }
+
+    pub(crate) fn actual_value(&self, parent_width: f32) -> f32 {
+        match self {
+            MarginTop::Auto => 0.0,
+            MarginTop::Length(length, unit) => match unit {
+                Unit::Px => *length,
+            },
+            MarginTop::Percentage(percentage) => parent_width * percentage / 100.0,
+        }
+    }
 }
