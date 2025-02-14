@@ -3,12 +3,10 @@ use color::Color;
 use display::Display;
 use font_size::FontSize;
 use height::Height;
-use margin::Margin;
 use margin_bottom::MarginBottom;
 use margin_left::MarginLeft;
 use margin_right::MarginRight;
 use margin_top::MarginTop;
-use padding::Padding;
 use padding_bottom::PaddingBottom;
 use padding_left::PaddingLeft;
 use padding_right::PaddingRight;
@@ -17,19 +15,17 @@ use width::Width;
 
 use crate::css::types::Declaration;
 
-pub(crate) const AVAILABLE_PROPERTIES: [&str; 16] = [
+pub(crate) const AVAILABLE_PROPERTIES: [&str; 14] = [
     "color",
     "display",
     "width",
     "height",
     "font-size",
     "background-color",
-    "padding",
     "padding-top",
     "padding-right",
     "padding-bottom",
     "padding-left",
-    "margin",
     "margin-top",
     "margin-right",
     "margin-bottom",
@@ -42,12 +38,10 @@ pub(crate) mod color;
 pub(crate) mod display;
 pub(crate) mod font_size;
 pub(crate) mod height;
-pub(crate) mod margin;
 pub(crate) mod margin_bottom;
 pub(crate) mod margin_left;
 pub(crate) mod margin_right;
 pub(crate) mod margin_top;
-pub(crate) mod padding;
 pub(crate) mod padding_bottom;
 pub(crate) mod padding_left;
 pub(crate) mod padding_right;
@@ -67,8 +61,6 @@ impl PropertyFactory {
             "background-color" => Some(Property::BackgroundColor(BackgroundColor::maybe_new(
                 &declaration.value,
             )?)),
-            "padding" => Some(Property::Padding(Padding::maybe_new(&declaration.value)?)),
-            "margin" => Some(Property::Margin(Margin::maybe_new(&declaration.value)?)),
             "margin-top" => Some(Property::MarginTop(MarginTop::maybe_new(
                 &declaration.value,
             )?)),
@@ -105,12 +97,10 @@ impl PropertyFactory {
             "height" => Property::Height(Height::default()),
             "font-size" => Property::FontSize(FontSize::default()),
             "background-color" => Property::BackgroundColor(BackgroundColor::default()),
-            "padding" => Property::Padding(Padding::default()),
             "padding-top" => Property::PaddingTop(PaddingTop::default()),
             "padding-right" => Property::PaddingRight(PaddingRight::default()),
             "padding-bottom" => Property::PaddingBottom(PaddingBottom::default()),
             "padding-left" => Property::PaddingLeft(PaddingLeft::default()),
-            "margin" => Property::Margin(Margin::default()),
             "margin-top" => Property::MarginTop(MarginTop::default()),
             "margin-right" => Property::MarginRight(MarginRight::default()),
             "margin-bottom" => Property::MarginBottom(MarginBottom::default()),
@@ -128,12 +118,10 @@ pub(crate) enum Property {
     Height(Height),
     FontSize(FontSize),
     BackgroundColor(BackgroundColor),
-    Padding(Padding),
     PaddingTop(PaddingTop),
     PaddingRight(PaddingRight),
     PaddingBottom(PaddingBottom),
     PaddingLeft(PaddingLeft),
-    Margin(Margin),
     MarginTop(MarginTop),
     MarginRight(MarginRight),
     MarginBottom(MarginBottom),
@@ -149,12 +137,10 @@ impl Property {
             Property::Height(height) => height.name(),
             Property::FontSize(font_size) => font_size.name(),
             Property::BackgroundColor(background_color) => background_color.name(),
-            Property::Padding(padding) => padding.name(),
             Property::PaddingTop(padding_top) => padding_top.name(),
             Property::PaddingRight(padding_right) => padding_right.name(),
             Property::PaddingBottom(padding_bottom) => padding_bottom.name(),
             Property::PaddingLeft(padding_left) => padding_left.name(),
-            Property::Margin(margin) => margin.name(),
             Property::MarginTop(margin_top) => margin_top.name(),
             Property::MarginRight(margin_right) => margin_right.name(),
             Property::MarginBottom(margin_bottom) => margin_bottom.name(),

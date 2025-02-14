@@ -1,7 +1,10 @@
 use core::fmt;
 use std::collections::HashMap;
 
-use crate::{style::properties::Property, Element, Node, NodeType};
+use crate::{
+    style::properties::{width::Width, Property},
+    Element, Node, NodeType,
+};
 
 use super::properties::display::Display;
 
@@ -22,6 +25,21 @@ impl fmt::Debug for StyledNode<'_> {
     }
 }
 
+macro_rules! generate_property_getter {
+    ($name:ident, $property_type:ident) => {
+        #[allow(unused)]
+        pub(crate) fn $name(&self) -> &$property_type {
+            if let Some(Property::$property_type(value)) =
+                self.styles.get_property(stringify!($name))
+            {
+                return &value;
+            }
+
+            panic!(concat!(stringify!($property_type), " property not found"));
+        }
+    };
+}
+
 impl StyledNode<'_> {
     fn node_representation(&self) -> String {
         self.node_type_summary(&self.node.node_type)
@@ -35,14 +53,6 @@ impl StyledNode<'_> {
         }
     }
 
-    pub(crate) fn display(&self) -> &Display {
-        if let Some(Property::Display(display)) = self.styles.get_property("display") {
-            return display;
-        }
-
-        panic!("Display property not found");
-    }
-
     pub(crate) fn has_display_none(&self) -> bool {
         self.display() == &Display::None
     }
@@ -54,6 +64,9 @@ impl StyledNode<'_> {
     pub(crate) fn is_inline_level(&self) -> bool {
         self.display() == &Display::Inline
     }
+
+    generate_property_getter!(display, Display);
+    generate_property_getter!(width, Width);
 }
 
 #[derive(Debug, Default, PartialEq)]
