@@ -22,4 +22,10 @@ impl FontSize {
     pub(crate) fn default() -> FontSize {
         FontSize::Length(16.0, Unit::Px)
     }
+
+    pub(crate) fn value(&self) -> f32 {
+        match self {
+            FontSize::Length(value, _) => *value,
+        }
+    }
 }

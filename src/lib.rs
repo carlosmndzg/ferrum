@@ -37,7 +37,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     let style_tree = style::build_style_tree(&dom, &stylesheet, &user_agent_stylesheet);
 
-    println!("Style tree: {:#?}", style_tree);
+    // println!("Style tree: {:#?}", style_tree);
 
     let layout_tree = layout::build_layout_tree(&style_tree, (800.0, 600.0));
 

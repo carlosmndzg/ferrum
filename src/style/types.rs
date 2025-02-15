@@ -3,10 +3,10 @@ use std::collections::HashMap;
 
 use crate::{
     style::properties::{
-        height::Height, margin_bottom::MarginBottom, margin_left::MarginLeft,
-        margin_right::MarginRight, margin_top::MarginTop, padding_bottom::PaddingBottom,
-        padding_left::PaddingLeft, padding_right::PaddingRight, padding_top::PaddingTop,
-        width::Width, Property,
+        font_size::FontSize, height::Height, line_height::LineHeight, margin_bottom::MarginBottom,
+        margin_left::MarginLeft, margin_right::MarginRight, margin_top::MarginTop,
+        padding_bottom::PaddingBottom, padding_left::PaddingLeft, padding_right::PaddingRight,
+        padding_top::PaddingTop, width::Width, Property,
     },
     Element, Node, NodeType,
 };
@@ -59,6 +59,14 @@ impl StyledNode<'_> {
         }
     }
 
+    pub(crate) fn is_empty_text_node(&self) -> bool {
+        if let NodeType::Text(text) = &self.node.node_type {
+            return text.text.trim().is_empty();
+        }
+
+        false
+    }
+
     pub(crate) fn has_display_none(&self) -> bool {
         self.display() == &Display::None
     }
@@ -82,6 +90,8 @@ impl StyledNode<'_> {
     generate_property_getter!(padding_right, PaddingRight);
     generate_property_getter!(padding_bottom, PaddingBottom);
     generate_property_getter!(padding_left, PaddingLeft);
+    generate_property_getter!(font_size, FontSize);
+    generate_property_getter!(line_height, LineHeight);
 }
 
 #[derive(Debug, Default, PartialEq)]

@@ -1,6 +1,10 @@
+use std::mem::take;
+
 use crate::style::types::StyledNode;
 
-use super::types::{BoxDimensions, BoxType, EdgeSizes, FormattingContext, LayoutNode, Rectangle};
+use super::types::{
+    BoxDimensions, BoxType, EdgeSizes, FormattingContext, LayoutNode, Rectangle, WordBuilder,
+};
 
 pub(crate) struct LayoutTreeBuilder {
     dimensions: (f32, f32),
@@ -252,8 +256,91 @@ impl LayoutTreeBuilder {
         }
     }
 
-    fn handle_inline_formatting_context(&self, _node: &mut LayoutNode) {
-        todo!()
+    fn handle_inline_formatting_context(&self, node: &mut LayoutNode) {
+        if node.children.is_empty()
+            || matches!(node.children[0].box_type, BoxType::Block(node, ..) if node.is_empty_text_node())
+        {
+            return;
+        }
+
+        let containing_block = &node.box_dimensions;
+
+        let mut current_line = LayoutNode::create_line_box();
+        current_line.box_dimensions.content.width = 0.0;
+        current_line.box_dimensions.content.x = containing_block.content.x;
+
+        let words = WordBuilder::generate_vector_from_layout_nodes(take(&mut node.children));
+
+        let mut i = 0;
+
+        while i < words.len() {
+            let word = &words[i];
+
+            if (current_line.children.is_empty() && !word.text.trim().is_empty())
+                || (current_line.box_dimensions.content.width + word.width
+                    <= containing_block.content.width
+                    && !current_line.children.is_empty())
+            {
+                let height = 0.75 * word.font_size;
+                let width = word.width;
+                let mut word = LayoutNode::create_word_box(
+                    word.text.clone(),
+                    word.font_size,
+                    word.line_height,
+                );
+
+                word.box_dimensions.content.width = width;
+                word.box_dimensions.content.height = height;
+                word.box_dimensions.content.x =
+                    current_line.box_dimensions.content.width + containing_block.content.x;
+
+                current_line.box_dimensions.content.width += width;
+                current_line.children.push(word);
+                i += 1;
+            } else if word.text.trim().is_empty() {
+                i += 1;
+            } else {
+                node.children.push(current_line);
+                current_line = LayoutNode::create_line_box();
+                current_line.box_dimensions.content.width = 0.0;
+                current_line.box_dimensions.content.x = containing_block.content.x;
+            }
+        }
+
+        if !current_line.children.is_empty() {
+            node.children.push(current_line);
+        }
+
+        let mut acc_height = 0.0;
+
+        for line in &mut node.children {
+            let mut max = 0.0;
+
+            for word in &line.children {
+                let BoxType::Word { line_height, .. } = &word.box_type else {
+                    panic!("Expected word box type");
+                };
+
+                if word.box_dimensions.content.height > max {
+                    max = word.box_dimensions.content.height * line_height;
+                }
+            }
+
+            line.box_dimensions.content.height = max;
+            line.box_dimensions.content.y = containing_block.content.y + acc_height;
+            acc_height += max;
+
+            for word in &mut line.children {
+                let space_behind_word =
+                    (line.box_dimensions.content.height - word.box_dimensions.content.height) / 2.0;
+                word.box_dimensions.content.y = line.box_dimensions.content.y
+                    + line.box_dimensions.content.height
+                    - space_behind_word
+                    - word.box_dimensions.content.height;
+            }
+        }
+
+        node.box_dimensions.content.height = acc_height;
     }
 
     fn get_children_that_are_displayed<'a>(

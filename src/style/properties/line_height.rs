@@ -22,4 +22,10 @@ impl LineHeight {
     pub(crate) fn default() -> LineHeight {
         LineHeight::UnitLess(1.2)
     }
+
+    pub(crate) fn value(&self) -> f32 {
+        match self {
+            LineHeight::UnitLess(value) => *value,
+        }
+    }
 }
