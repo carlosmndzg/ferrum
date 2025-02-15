@@ -281,12 +281,13 @@ impl LayoutTreeBuilder {
                     <= containing_block.content.width
                     && !current_line.children.is_empty())
             {
-                let height = 0.75 * word.font_size;
+                let height = word.font_size;
                 let width = word.width;
                 let mut word = LayoutNode::create_word_box(
                     word.text.clone(),
                     word.font_size,
                     word.line_height,
+                    word.color.clone(),
                 );
 
                 word.box_dimensions.content.width = width;
@@ -315,6 +316,7 @@ impl LayoutTreeBuilder {
 
         for line in &mut node.children {
             let mut max = 0.0;
+            let mut max_font_size = 0.0;
 
             for word in &line.children {
                 let BoxType::Word { line_height, .. } = &word.box_type else {
@@ -324,19 +326,21 @@ impl LayoutTreeBuilder {
                 if word.box_dimensions.content.height > max {
                     max = word.box_dimensions.content.height * line_height;
                 }
+
+                if word.box_dimensions.content.height > max_font_size {
+                    max_font_size = word.box_dimensions.content.height;
+                }
             }
 
             line.box_dimensions.content.height = max;
             line.box_dimensions.content.y = containing_block.content.y + acc_height;
             acc_height += max;
 
+            let initial_y = line.box_dimensions.content.y + line.box_dimensions.content.height
+                - ((line.box_dimensions.content.height - max_font_size) / 2.0);
+
             for word in &mut line.children {
-                let space_behind_word =
-                    (line.box_dimensions.content.height - word.box_dimensions.content.height) / 2.0;
-                word.box_dimensions.content.y = line.box_dimensions.content.y
-                    + line.box_dimensions.content.height
-                    - space_behind_word
-                    - word.box_dimensions.content.height;
+                word.box_dimensions.content.y = initial_y;
             }
         }
 

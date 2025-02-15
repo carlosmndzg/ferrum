@@ -3,10 +3,11 @@ use std::collections::HashMap;
 
 use crate::{
     style::properties::{
-        font_size::FontSize, height::Height, line_height::LineHeight, margin_bottom::MarginBottom,
-        margin_left::MarginLeft, margin_right::MarginRight, margin_top::MarginTop,
-        padding_bottom::PaddingBottom, padding_left::PaddingLeft, padding_right::PaddingRight,
-        padding_top::PaddingTop, width::Width, Property,
+        background_color::BackgroundColor, color::Color, font_size::FontSize, height::Height,
+        line_height::LineHeight, margin_bottom::MarginBottom, margin_left::MarginLeft,
+        margin_right::MarginRight, margin_top::MarginTop, padding_bottom::PaddingBottom,
+        padding_left::PaddingLeft, padding_right::PaddingRight, padding_top::PaddingTop,
+        width::Width, Property,
     },
     Element, Node, NodeType,
 };
@@ -92,6 +93,8 @@ impl StyledNode<'_> {
     generate_property_getter!(padding_left, PaddingLeft);
     generate_property_getter!(font_size, FontSize);
     generate_property_getter!(line_height, LineHeight);
+    generate_property_getter!(background_color, BackgroundColor);
+    generate_property_getter!(color, Color);
 }
 
 #[derive(Debug, Default, PartialEq)]

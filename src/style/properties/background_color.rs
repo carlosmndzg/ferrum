@@ -31,4 +31,8 @@ impl BackgroundColor {
             value: Rgb::wrap_color(255, 255, 255).unwrap(),
         }
     }
+
+    pub(crate) fn value(&self) -> &Rgb {
+        &self.value
+    }
 }

@@ -41,7 +41,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     let layout_tree = layout::build_layout_tree(&style_tree, (800.0, 600.0));
 
-    println!("Layout tree: {:#?}", layout_tree);
+    // println!("Layout tree: {:#?}", layout_tree);
 
     painter::paint(&layout_tree);
 

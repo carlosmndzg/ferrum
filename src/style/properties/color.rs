@@ -31,4 +31,8 @@ impl Color {
             value: Rgb::wrap_color(0, 0, 0).unwrap(),
         }
     }
+
+    pub(crate) fn value(&self) -> Rgb {
+        self.value.clone()
+    }
 }
