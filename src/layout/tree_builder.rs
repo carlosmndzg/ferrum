@@ -32,7 +32,10 @@ impl LayoutTreeBuilder {
         let node_children = &self.get_children_that_are_displayed(node);
         let formatting_context = self.determine_formatting_context(node_children);
 
-        if node.is_inline_level() && formatting_context == FormattingContext::Block {
+        if node.is_inline_level()
+            && !node.children.is_empty()
+            && formatting_context == FormattingContext::Block
+        {
             panic!("Inline-level node with block-level children is not supported!");
         }
 
@@ -85,6 +88,8 @@ impl LayoutTreeBuilder {
     fn compute_layout(&self, node: &mut LayoutNode, containing_block: &BoxDimensions) {
         if let BoxType::Block(styled_node, ..) = &node.box_type {
             self.compute_block_layout(node, styled_node, containing_block);
+        } else if let BoxType::Anonymous = &node.box_type {
+            self.compute_anonymous_layout(node, containing_block);
         } else {
             panic!("Inline layout is not supported yet!");
         }
@@ -99,6 +104,15 @@ impl LayoutTreeBuilder {
         self.compute_width_block_layout(node, styled_node, containing_block);
         self.compute_position_block_layout(node, styled_node, containing_block);
         self.compute_height_block_layout(node, styled_node);
+    }
+
+    fn compute_anonymous_layout(&self, node: &mut LayoutNode, containing_block: &BoxDimensions) {
+        node.box_dimensions.content.width = containing_block.content.width;
+        node.box_dimensions.content.x = containing_block.content.x;
+        node.box_dimensions.content.y =
+            containing_block.content.y + containing_block.content.height;
+
+        self.handle_inline_formatting_context(node);
     }
 
     fn compute_width_block_layout(
@@ -213,9 +227,13 @@ impl LayoutTreeBuilder {
         };
 
         if formatting_context == &FormattingContext::Inline {
-            panic!("Inline formatting context is not supported yet!");
+            self.handle_inline_formatting_context(node);
+        } else {
+            self.handle_block_formatting_context(node, styled_node);
         }
+    }
 
+    fn handle_block_formatting_context(&self, node: &mut LayoutNode, styled_node: &StyledNode) {
         for child in &mut node.children {
             self.compute_layout(child, &node.box_dimensions);
 
@@ -232,6 +250,10 @@ impl LayoutTreeBuilder {
             node.box_dimensions.content.height =
                 height.actual_value(node.box_dimensions.content.width);
         }
+    }
+
+    fn handle_inline_formatting_context(&self, _node: &mut LayoutNode) {
+        todo!()
     }
 
     fn get_children_that_are_displayed<'a>(

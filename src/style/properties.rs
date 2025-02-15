@@ -3,6 +3,7 @@ use color::Color;
 use display::Display;
 use font_size::FontSize;
 use height::Height;
+use line_height::LineHeight;
 use margin_bottom::MarginBottom;
 use margin_left::MarginLeft;
 use margin_right::MarginRight;
@@ -15,7 +16,7 @@ use width::Width;
 
 use crate::css::types::Declaration;
 
-pub(crate) const AVAILABLE_PROPERTIES: [&str; 14] = [
+pub(crate) const AVAILABLE_PROPERTIES: [&str; 15] = [
     "color",
     "display",
     "width",
@@ -30,14 +31,16 @@ pub(crate) const AVAILABLE_PROPERTIES: [&str; 14] = [
     "margin-right",
     "margin-bottom",
     "margin-left",
+    "line-height",
 ];
-pub(crate) const INHERITABLE_PROPERTIES: [&str; 2] = ["color", "font-size"];
+pub(crate) const INHERITABLE_PROPERTIES: [&str; 3] = ["color", "font-size", "line-height"];
 
 pub(crate) mod background_color;
 pub(crate) mod color;
 pub(crate) mod display;
 pub(crate) mod font_size;
 pub(crate) mod height;
+pub(crate) mod line_height;
 pub(crate) mod margin_bottom;
 pub(crate) mod margin_left;
 pub(crate) mod margin_right;
@@ -85,6 +88,9 @@ impl PropertyFactory {
             "padding-left" => Some(Property::PaddingLeft(PaddingLeft::maybe_new(
                 &declaration.value,
             )?)),
+            "line-height" => Some(Property::LineHeight(LineHeight::maybe_new(
+                &declaration.value,
+            )?)),
             _ => None,
         }
     }
@@ -105,6 +111,7 @@ impl PropertyFactory {
             "margin-right" => Property::MarginRight(MarginRight::default()),
             "margin-bottom" => Property::MarginBottom(MarginBottom::default()),
             "margin-left" => Property::MarginLeft(MarginLeft::default()),
+            "line-height" => Property::LineHeight(LineHeight::default()),
             _ => panic!("Unknown property \"{}\"", name),
         }
     }
@@ -126,6 +133,7 @@ pub(crate) enum Property {
     MarginRight(MarginRight),
     MarginBottom(MarginBottom),
     MarginLeft(MarginLeft),
+    LineHeight(LineHeight),
 }
 
 impl Property {
@@ -145,6 +153,7 @@ impl Property {
             Property::MarginRight(margin_right) => margin_right.name(),
             Property::MarginBottom(margin_bottom) => margin_bottom.name(),
             Property::MarginLeft(margin_left) => margin_left.name(),
+            Property::LineHeight(line_height) => line_height.name(),
         }
     }
 }
