@@ -340,7 +340,7 @@ impl LayoutTreeBuilder {
                 - ((line.box_dimensions.content.height - max_font_size) / 2.0);
 
             for word in &mut line.children {
-                word.box_dimensions.content.y = initial_y;
+                word.box_dimensions.content.y = initial_y - word.box_dimensions.content.height;
             }
         }
 

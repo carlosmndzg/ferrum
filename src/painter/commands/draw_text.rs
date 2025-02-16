@@ -44,9 +44,9 @@ impl Command for DrawText {
 
         dt.draw_text(
             &font,
-            self.font_size * 0.98,
+            self.font_size,
             &self.text,
-            Point::new(self.x, self.y),
+            Point::new(self.x, self.y + self.font_size * 0.9),
             &source,
             &DrawOptions::new(),
         );
