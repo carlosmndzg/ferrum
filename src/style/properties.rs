@@ -13,11 +13,12 @@ use padding_bottom::PaddingBottom;
 use padding_left::PaddingLeft;
 use padding_right::PaddingRight;
 use padding_top::PaddingTop;
+use text_align::TextAlign;
 use width::Width;
 
 use crate::css::types::Declaration;
 
-pub(crate) const AVAILABLE_PROPERTIES: [&str; 16] = [
+pub(crate) const AVAILABLE_PROPERTIES: [&str; 17] = [
     "color",
     "display",
     "width",
@@ -34,9 +35,15 @@ pub(crate) const AVAILABLE_PROPERTIES: [&str; 16] = [
     "margin-left",
     "line-height",
     "font-weight",
+    "text-align",
 ];
-pub(crate) const INHERITABLE_PROPERTIES: [&str; 4] =
-    ["color", "font-size", "line-height", "font-weight"];
+pub(crate) const INHERITABLE_PROPERTIES: [&str; 5] = [
+    "color",
+    "font-size",
+    "line-height",
+    "font-weight",
+    "text-align",
+];
 
 pub(crate) mod background_color;
 pub(crate) mod color;
@@ -53,6 +60,7 @@ pub(crate) mod padding_bottom;
 pub(crate) mod padding_left;
 pub(crate) mod padding_right;
 pub(crate) mod padding_top;
+pub(crate) mod text_align;
 pub(crate) mod width;
 
 pub(crate) struct PropertyFactory;
@@ -98,6 +106,9 @@ impl PropertyFactory {
             "font-weight" => Some(Property::FontWeight(FontWeight::maybe_new(
                 &declaration.value,
             )?)),
+            "text-align" => Some(Property::TextAlign(TextAlign::maybe_new(
+                &declaration.value,
+            )?)),
             _ => None,
         }
     }
@@ -120,6 +131,7 @@ impl PropertyFactory {
             "margin-left" => Property::MarginLeft(MarginLeft::default()),
             "line-height" => Property::LineHeight(LineHeight::default()),
             "font-weight" => Property::FontWeight(FontWeight::default()),
+            "text-align" => Property::TextAlign(TextAlign::default()),
             _ => panic!("Unknown property \"{}\"", name),
         }
     }
@@ -143,6 +155,7 @@ pub(crate) enum Property {
     MarginLeft(MarginLeft),
     LineHeight(LineHeight),
     FontWeight(FontWeight),
+    TextAlign(TextAlign),
 }
 
 impl Property {
@@ -164,6 +177,7 @@ impl Property {
             Property::MarginLeft(margin_left) => margin_left.name(),
             Property::LineHeight(line_height) => line_height.name(),
             Property::FontWeight(font_weight) => font_weight.name(),
+            Property::TextAlign(text_align) => text_align.name(),
         }
     }
 }

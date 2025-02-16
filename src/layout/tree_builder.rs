@@ -1,6 +1,6 @@
 use std::mem::take;
 
-use crate::style::types::StyledNode;
+use crate::style::{properties::text_align::TextAlign, types::StyledNode};
 
 use super::types::{
     BoxDimensions, BoxType, EdgeSizes, FormattingContext, LayoutNode, Rectangle, WordBuilder,
@@ -263,12 +263,15 @@ impl LayoutTreeBuilder {
             return;
         }
 
-        let containing_block = &node.box_dimensions;
+        let containing_block_width = node.box_dimensions.content.width;
+        let containing_block_x = node.box_dimensions.content.x;
+        let containing_block_y = node.box_dimensions.content.y;
 
         let mut current_line = LayoutNode::create_line_box();
         current_line.box_dimensions.content.width = 0.0;
-        current_line.box_dimensions.content.x = containing_block.content.x;
+        current_line.box_dimensions.content.x = containing_block_x;
 
+        let text_alignment = self.determine_text_alignment(node);
         let words = WordBuilder::generate_vector_from_layout_nodes(take(&mut node.children));
 
         let mut i = 0;
@@ -278,7 +281,7 @@ impl LayoutTreeBuilder {
 
             if (current_line.children.is_empty() && !word.text.trim().is_empty())
                 || (current_line.box_dimensions.content.width + word.width
-                    <= containing_block.content.width
+                    <= containing_block_width
                     && !current_line.children.is_empty())
             {
                 let height = word.font_size;
@@ -294,7 +297,7 @@ impl LayoutTreeBuilder {
                 word.box_dimensions.content.width = width;
                 word.box_dimensions.content.height = height;
                 word.box_dimensions.content.x =
-                    current_line.box_dimensions.content.width + containing_block.content.x;
+                    current_line.box_dimensions.content.width + containing_block_x;
 
                 current_line.box_dimensions.content.width += width;
                 current_line.children.push(word);
@@ -305,13 +308,28 @@ impl LayoutTreeBuilder {
                 node.children.push(current_line);
                 current_line = LayoutNode::create_line_box();
                 current_line.box_dimensions.content.width = 0.0;
-                current_line.box_dimensions.content.x = containing_block.content.x;
+                current_line.box_dimensions.content.x = containing_block_x;
             }
         }
 
         if !current_line.children.is_empty() {
             node.children.push(current_line);
         }
+
+        // We clean space at the end of the lines if it exists
+        for line in &mut node.children {
+            let last_word = line.children.last().expect("Expected last word");
+            let BoxType::Word { text, .. } = &last_word.box_type else {
+                panic!("Expected word box type");
+            };
+
+            if text.trim().is_empty() {
+                line.box_dimensions.content.width -= last_word.box_dimensions.content.width;
+                line.children.pop();
+            }
+        }
+
+        self.handle_text_alignment(node, &text_alignment);
 
         let mut acc_height = 0.0;
 
@@ -334,7 +352,7 @@ impl LayoutTreeBuilder {
             }
 
             line.box_dimensions.content.height = max;
-            line.box_dimensions.content.y = containing_block.content.y + acc_height;
+            line.box_dimensions.content.y = containing_block_y + acc_height;
             acc_height += max;
 
             let initial_y = line.box_dimensions.content.y + line.box_dimensions.content.height
@@ -346,6 +364,43 @@ impl LayoutTreeBuilder {
         }
 
         node.box_dimensions.content.height = acc_height;
+    }
+
+    fn determine_text_alignment(&self, node: &LayoutNode) -> TextAlign {
+        if let BoxType::Block(styled_node, ..) = &node.box_type {
+            return styled_node.text_align().value();
+        }
+
+        if let BoxType::Anonymous = &node.box_type {
+            let children = node.children.first().expect("Expected first child");
+
+            if let BoxType::Inline(styled_node) = &children.box_type {
+                return styled_node.text_align().value();
+            } else {
+                panic!("Expected inline box type");
+            }
+        }
+
+        panic!("Expected block or anonymous box type");
+    }
+
+    fn handle_text_alignment(&self, node: &mut LayoutNode, text_alignment: &TextAlign) {
+        for line in &mut node.children {
+            let line_width = line.box_dimensions.content.width;
+            let remaining_space = node.box_dimensions.content.width - line_width;
+
+            for word in &mut line.children {
+                match text_alignment {
+                    TextAlign::Center => {
+                        word.box_dimensions.content.x += remaining_space / 2.0;
+                    }
+                    TextAlign::Right => {
+                        word.box_dimensions.content.x += remaining_space;
+                    }
+                    _ => {}
+                }
+            }
+        }
     }
 
     fn get_children_that_are_displayed<'a>(

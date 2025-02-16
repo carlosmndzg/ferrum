@@ -7,7 +7,8 @@ use crate::{
         font_weight::FontWeight, height::Height, line_height::LineHeight,
         margin_bottom::MarginBottom, margin_left::MarginLeft, margin_right::MarginRight,
         margin_top::MarginTop, padding_bottom::PaddingBottom, padding_left::PaddingLeft,
-        padding_right::PaddingRight, padding_top::PaddingTop, width::Width, Property,
+        padding_right::PaddingRight, padding_top::PaddingTop, text_align::TextAlign, width::Width,
+        Property,
     },
     Element, Node, NodeType,
 };
@@ -96,6 +97,7 @@ impl StyledNode<'_> {
     generate_property_getter!(background_color, BackgroundColor);
     generate_property_getter!(color, Color);
     generate_property_getter!(font_weight, FontWeight);
+    generate_property_getter!(text_align, TextAlign);
 }
 
 #[derive(Debug, Default, PartialEq)]
