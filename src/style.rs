@@ -240,7 +240,12 @@ mod tests {
         assert_eq!(
             color,
             Color {
-                value: Rgb { r: 0, g: 0, b: 0 }
+                value: Rgb {
+                    r: 0,
+                    g: 0,
+                    b: 0,
+                    a: 1.0
+                }
             }
         );
 
@@ -261,7 +266,8 @@ mod tests {
                 value: Rgb {
                     r: 127,
                     g: 255,
-                    b: 212
+                    b: 212,
+                    a: 1.0
                 }
             }
         );
@@ -286,7 +292,8 @@ mod tests {
                 value: Rgb {
                     r: 127,
                     g: 255,
-                    b: 212
+                    b: 212,
+                    a: 1.0
                 }
             }
         );

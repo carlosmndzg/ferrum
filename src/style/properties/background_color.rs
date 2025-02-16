@@ -28,7 +28,7 @@ impl BackgroundColor {
 
     pub(crate) fn default() -> BackgroundColor {
         BackgroundColor {
-            value: Rgb::wrap_color(255, 255, 255).unwrap(),
+            value: Rgb::convert_keyword_to_rgb("transparent").unwrap(),
         }
     }
 

@@ -185,7 +185,7 @@ mod tests {
 
         if let Some(property) = property {
             let Property::Color(Color {
-                value: Rgb { r, g, b },
+                value: Rgb { r, g, b, .. },
             }) = property
             else {
                 panic!("Expected a property to be created");

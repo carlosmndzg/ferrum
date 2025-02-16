@@ -31,17 +31,11 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = get_file_contents(&config.file_path)?;
     let dom = html::parse(&contents);
 
-    let css = get_css(&dom);
-    let stylesheet = css::parse(css);
+    let author_stylesheet = css::parse(get_css(&dom));
     let user_agent_stylesheet = css::parse(USER_AGENT_STYLESHEET);
 
-    let style_tree = style::build_style_tree(&dom, &stylesheet, &user_agent_stylesheet);
-
-    // println!("Style tree: {:#?}", style_tree);
-
+    let style_tree = style::build_style_tree(&dom, &author_stylesheet, &user_agent_stylesheet);
     let layout_tree = layout::build_layout_tree(&style_tree, (800.0, 600.0));
-
-    // println!("Layout tree: {:#?}", layout_tree);
 
     painter::paint(&layout_tree);
 

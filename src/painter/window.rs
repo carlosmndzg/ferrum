@@ -23,13 +23,13 @@ impl Window {
         let size = self.window.get_size();
         let mut dt = DrawTarget::new(size.0 as i32, size.1 as i32);
 
+        self.clear_canvas(&mut dt);
+
+        for command in &commands.commands {
+            command.execute(&mut dt);
+        }
+
         while self.window.is_open() && !self.window.is_key_down(minifb::Key::Escape) {
-            self.clear_canvas(&mut dt);
-
-            for command in &commands.commands {
-                command.execute(&mut dt);
-            }
-
             self.window
                 .update_with_buffer(dt.get_data(), size.0, size.1)
                 .unwrap();

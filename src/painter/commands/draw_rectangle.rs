@@ -32,7 +32,7 @@ impl Command for DrawRectangle {
             r: self.color.r,
             g: self.color.g,
             b: self.color.b,
-            a: 255,
+            a: (self.color.a * 256.0).floor() as u8,
         });
 
         pb.rect(self.x, self.y, self.width, self.height);

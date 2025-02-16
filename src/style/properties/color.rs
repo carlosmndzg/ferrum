@@ -28,7 +28,7 @@ impl Color {
 
     pub(crate) fn default() -> Color {
         Color {
-            value: Rgb::wrap_color(0, 0, 0).unwrap(),
+            value: Rgb::wrap_color(0, 0, 0, 1.0).unwrap(),
         }
     }
 
