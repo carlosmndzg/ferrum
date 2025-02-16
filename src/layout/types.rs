@@ -1,4 +1,5 @@
 use core::{fmt, panic};
+use std::collections::HashMap;
 
 use font_kit::{
     family_name::FamilyName,
@@ -42,7 +43,7 @@ impl<'a> LayoutNode<'a> {
         text: String,
         font_size: f32,
         line_height: f32,
-        font_weight: f32,
+        font_weight: u32,
         color: Rgb,
     ) -> LayoutNode<'a> {
         LayoutNode {
@@ -110,7 +111,7 @@ pub(crate) enum BoxType<'a> {
         text: String,
         font_size: f32,
         line_height: f32,
-        font_weight: f32,
+        font_weight: u32,
         color: Rgb,
     },
 }
@@ -161,7 +162,7 @@ pub(crate) struct Word {
     pub(crate) width: f32,
     pub(crate) line_height: f32,
     pub(crate) font_size: f32,
-    pub(crate) font_weight: f32,
+    pub(crate) font_weight: u32,
     pub(crate) color: Rgb,
 }
 
@@ -259,20 +260,24 @@ impl WordBuilder {
             }
         }
 
-        for word in &mut words {
-            let font = SystemSource::new()
-                .select_best_match(
-                    &[FamilyName::SansSerif],
-                    &Properties {
-                        weight: Weight(word.font_weight),
-                        ..Default::default()
-                    },
-                )
-                .unwrap()
-                .load()
-                .unwrap();
+        let mut font_map = HashMap::new();
 
-            word.width = WordBuilder::measure_word_width(&word.text, &font, word.font_size);
+        for word in &mut words {
+            let font = font_map.entry(word.font_weight).or_insert_with(|| {
+                SystemSource::new()
+                    .select_best_match(
+                        &[FamilyName::SansSerif],
+                        &Properties {
+                            weight: Weight(word.font_weight as f32),
+                            ..Default::default()
+                        },
+                    )
+                    .unwrap()
+                    .load()
+                    .unwrap()
+            });
+
+            word.width = WordBuilder::measure_word_width(&word.text, font, word.font_size);
         }
 
         words

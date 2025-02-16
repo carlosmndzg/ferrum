@@ -3,6 +3,9 @@ name = "ferrum"
 version = "0.1.0"
 edition = "2021"
 
+[profile.release]
+debug = true
+
 [dependencies]
 ego-tree = "0.10.0"
 font-kit = "0.14.2"

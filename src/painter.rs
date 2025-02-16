@@ -4,6 +4,7 @@ use crate::layout::types::LayoutNode;
 
 mod command_list;
 mod commands;
+mod fonts_context;
 mod window;
 
 pub fn paint(root: &LayoutNode) {

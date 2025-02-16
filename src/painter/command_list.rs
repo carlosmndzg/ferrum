@@ -1,30 +1,33 @@
 use crate::layout::types::{BoxType, LayoutNode};
 
-use super::commands::{draw_rectangle::DrawRectangle, draw_text::DrawText, Command};
+use super::{
+    commands::{draw_rectangle::DrawRectangle, draw_text::DrawText, Command},
+    fonts_context::FontsContext,
+};
 
 pub(crate) struct CommandList {
     pub(crate) commands: Vec<Box<dyn Command>>,
 }
 
 impl CommandList {
-    pub(crate) fn new(root: &LayoutNode) -> Self {
+    pub(crate) fn new(root: &LayoutNode, fonts_ctx: &mut FontsContext) -> Self {
         let mut instance = Self {
             commands: Vec::new(),
         };
 
-        instance.build_commands(root);
+        instance.build_commands(root, fonts_ctx);
 
         instance
     }
 
-    pub(crate) fn build_commands(&mut self, node: &LayoutNode) {
+    pub(crate) fn build_commands(&mut self, node: &LayoutNode, fonts_ctx: &mut FontsContext) {
         self.build_commands_for_background(node);
 
         if let BoxType::Word { .. } = node.box_type {
-            self.build_commands_for_text(node);
+            self.build_commands_for_text(node, fonts_ctx);
         } else {
             for child in &node.children {
-                self.build_commands(child);
+                self.build_commands(child, fonts_ctx);
             }
         }
     }
@@ -44,7 +47,11 @@ impl CommandList {
         }
     }
 
-    pub(crate) fn build_commands_for_text(&mut self, node: &LayoutNode) {
+    pub(crate) fn build_commands_for_text(
+        &mut self,
+        node: &LayoutNode,
+        fonts_ctx: &mut FontsContext,
+    ) {
         let BoxType::Word {
             text,
             font_size,
@@ -55,6 +62,8 @@ impl CommandList {
         else {
             return;
         };
+
+        fonts_ctx.add_font_if_not_exists(*font_weight);
 
         self.commands.push(Box::new(DrawText::new(
             node.box_dimensions.content.x,

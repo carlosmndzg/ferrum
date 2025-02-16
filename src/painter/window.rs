@@ -3,7 +3,7 @@ use raqote::{DrawTarget, SolidSource};
 
 use crate::layout::types::LayoutNode;
 
-use super::command_list::CommandList;
+use super::{command_list::CommandList, fonts_context::FontsContext};
 
 pub(crate) struct Window {
     window: MinifbWindow,
@@ -18,7 +18,9 @@ impl Window {
     }
 
     pub(crate) fn run(&mut self, root: &LayoutNode) {
-        let commands = CommandList::new(root);
+        let mut font_ctx = FontsContext::new();
+        let reference = &mut font_ctx;
+        let commands = CommandList::new(root, reference);
 
         let size = self.window.get_size();
         let mut dt = DrawTarget::new(size.0 as i32, size.1 as i32);
@@ -26,7 +28,7 @@ impl Window {
         self.clear_canvas(&mut dt);
 
         for command in &commands.commands {
-            command.execute(&mut dt);
+            command.execute(&mut dt, reference);
         }
 
         while self.window.is_open() && !self.window.is_key_down(minifb::Key::Escape) {

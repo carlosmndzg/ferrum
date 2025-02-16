@@ -1,6 +1,6 @@
 use raqote::{DrawOptions, DrawTarget, PathBuilder, SolidSource, Source};
 
-use crate::style::types::Rgb;
+use crate::{painter::fonts_context::FontsContext, style::types::Rgb};
 
 use super::Command;
 
@@ -25,7 +25,7 @@ impl DrawRectangle {
 }
 
 impl Command for DrawRectangle {
-    fn execute(&self, dt: &mut DrawTarget) {
+    fn execute(&self, dt: &mut DrawTarget, _font_ctx: &mut FontsContext) {
         let mut pb = PathBuilder::new();
 
         let source = Source::Solid(SolidSource {
