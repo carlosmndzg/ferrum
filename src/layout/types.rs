@@ -1,6 +1,11 @@
 use core::{fmt, panic};
 
-use font_kit::{family_name::FamilyName, font::Font, properties::Properties, source::SystemSource};
+use font_kit::{
+    family_name::FamilyName,
+    font::Font,
+    properties::{Properties, Weight},
+    source::SystemSource,
+};
 
 use crate::{
     style::types::{Rgb, StyledNode},
@@ -8,7 +13,6 @@ use crate::{
 };
 
 #[derive(Default)]
-#[allow(unused)]
 pub(crate) struct LayoutNode<'a> {
     pub(crate) box_dimensions: BoxDimensions,
     pub(crate) box_type: BoxType<'a>,
@@ -38,6 +42,7 @@ impl<'a> LayoutNode<'a> {
         text: String,
         font_size: f32,
         line_height: f32,
+        font_weight: f32,
         color: Rgb,
     ) -> LayoutNode<'a> {
         LayoutNode {
@@ -46,6 +51,7 @@ impl<'a> LayoutNode<'a> {
                 text,
                 font_size,
                 line_height,
+                font_weight,
                 color,
             },
             children: Vec::new(),
@@ -104,6 +110,7 @@ pub(crate) enum BoxType<'a> {
         text: String,
         font_size: f32,
         line_height: f32,
+        font_weight: f32,
         color: Rgb,
     },
 }
@@ -154,6 +161,7 @@ pub(crate) struct Word {
     pub(crate) width: f32,
     pub(crate) line_height: f32,
     pub(crate) font_size: f32,
+    pub(crate) font_weight: f32,
     pub(crate) color: Rgb,
 }
 
@@ -176,6 +184,7 @@ impl WordBuilder {
                 let line_height = styled_node.line_height().value();
                 let font_size = styled_node.font_size().value();
                 let color = &styled_node.color().value();
+                let font_weight = styled_node.font_weight().value();
                 let text = &t.text;
 
                 let mut word = String::new();
@@ -188,6 +197,7 @@ impl WordBuilder {
                                 width: 0.0,
                                 line_height,
                                 font_size,
+                                font_weight,
                                 color: color.clone(),
                             });
 
@@ -199,6 +209,7 @@ impl WordBuilder {
                             width: 0.0,
                             line_height,
                             font_size,
+                            font_weight,
                             color: color.clone(),
                         });
                     } else {
@@ -212,6 +223,7 @@ impl WordBuilder {
                         width: 0.0,
                         line_height,
                         font_size,
+                        font_weight,
                         color: color.clone(),
                     });
                 }
@@ -247,13 +259,19 @@ impl WordBuilder {
             }
         }
 
-        let font = SystemSource::new()
-            .select_best_match(&[FamilyName::SansSerif], &Properties::new())
-            .unwrap()
-            .load()
-            .unwrap();
-
         for word in &mut words {
+            let font = SystemSource::new()
+                .select_best_match(
+                    &[FamilyName::SansSerif],
+                    &Properties {
+                        weight: Weight(word.font_weight),
+                        ..Default::default()
+                    },
+                )
+                .unwrap()
+                .load()
+                .unwrap();
+
             word.width = WordBuilder::measure_word_width(&word.text, &font, word.font_size);
         }
 

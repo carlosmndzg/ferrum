@@ -287,6 +287,7 @@ impl LayoutTreeBuilder {
                     word.text.clone(),
                     word.font_size,
                     word.line_height,
+                    word.font_weight,
                     word.color.clone(),
                 );
 

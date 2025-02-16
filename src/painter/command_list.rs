@@ -48,6 +48,7 @@ impl CommandList {
         let BoxType::Word {
             text,
             font_size,
+            font_weight,
             color,
             ..
         } = &node.box_type
@@ -60,6 +61,7 @@ impl CommandList {
             node.box_dimensions.content.y,
             text.clone(),
             *font_size,
+            *font_weight,
             color.clone(),
         )));
     }

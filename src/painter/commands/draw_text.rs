@@ -1,4 +1,8 @@
-use font_kit::{family_name::FamilyName, properties::Properties, source::SystemSource};
+use font_kit::{
+    family_name::FamilyName,
+    properties::{Properties, Weight},
+    source::SystemSource,
+};
 use raqote::{DrawOptions, DrawTarget, Point, SolidSource, Source};
 
 use crate::style::types::Rgb;
@@ -10,16 +14,25 @@ pub(crate) struct DrawText {
     y: f32,
     text: String,
     font_size: f32,
+    font_weight: f32,
     color: Rgb,
 }
 
 impl DrawText {
-    pub(crate) fn new(x: f32, y: f32, text: String, font_size: f32, color: Rgb) -> Self {
+    pub(crate) fn new(
+        x: f32,
+        y: f32,
+        text: String,
+        font_size: f32,
+        font_weight: f32,
+        color: Rgb,
+    ) -> Self {
         Self {
             x,
             y,
             text,
             font_size,
+            font_weight,
             color,
         }
     }
@@ -28,7 +41,13 @@ impl DrawText {
 impl Command for DrawText {
     fn execute(&self, dt: &mut DrawTarget) {
         let font = SystemSource::new()
-            .select_best_match(&[FamilyName::SansSerif], &Properties::new())
+            .select_best_match(
+                &[FamilyName::SansSerif],
+                &Properties {
+                    weight: Weight(self.font_weight),
+                    ..Default::default()
+                },
+            )
             .unwrap()
             .load()
             .unwrap();

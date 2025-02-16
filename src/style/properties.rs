@@ -2,6 +2,7 @@ use background_color::BackgroundColor;
 use color::Color;
 use display::Display;
 use font_size::FontSize;
+use font_weight::FontWeight;
 use height::Height;
 use line_height::LineHeight;
 use margin_bottom::MarginBottom;
@@ -16,7 +17,7 @@ use width::Width;
 
 use crate::css::types::Declaration;
 
-pub(crate) const AVAILABLE_PROPERTIES: [&str; 15] = [
+pub(crate) const AVAILABLE_PROPERTIES: [&str; 16] = [
     "color",
     "display",
     "width",
@@ -32,13 +33,16 @@ pub(crate) const AVAILABLE_PROPERTIES: [&str; 15] = [
     "margin-bottom",
     "margin-left",
     "line-height",
+    "font-weight",
 ];
-pub(crate) const INHERITABLE_PROPERTIES: [&str; 3] = ["color", "font-size", "line-height"];
+pub(crate) const INHERITABLE_PROPERTIES: [&str; 4] =
+    ["color", "font-size", "line-height", "font-weight"];
 
 pub(crate) mod background_color;
 pub(crate) mod color;
 pub(crate) mod display;
 pub(crate) mod font_size;
+pub(crate) mod font_weight;
 pub(crate) mod height;
 pub(crate) mod line_height;
 pub(crate) mod margin_bottom;
@@ -91,6 +95,9 @@ impl PropertyFactory {
             "line-height" => Some(Property::LineHeight(LineHeight::maybe_new(
                 &declaration.value,
             )?)),
+            "font-weight" => Some(Property::FontWeight(FontWeight::maybe_new(
+                &declaration.value,
+            )?)),
             _ => None,
         }
     }
@@ -112,6 +119,7 @@ impl PropertyFactory {
             "margin-bottom" => Property::MarginBottom(MarginBottom::default()),
             "margin-left" => Property::MarginLeft(MarginLeft::default()),
             "line-height" => Property::LineHeight(LineHeight::default()),
+            "font-weight" => Property::FontWeight(FontWeight::default()),
             _ => panic!("Unknown property \"{}\"", name),
         }
     }
@@ -134,6 +142,7 @@ pub(crate) enum Property {
     MarginBottom(MarginBottom),
     MarginLeft(MarginLeft),
     LineHeight(LineHeight),
+    FontWeight(FontWeight),
 }
 
 impl Property {
@@ -154,6 +163,7 @@ impl Property {
             Property::MarginBottom(margin_bottom) => margin_bottom.name(),
             Property::MarginLeft(margin_left) => margin_left.name(),
             Property::LineHeight(line_height) => line_height.name(),
+            Property::FontWeight(font_weight) => font_weight.name(),
         }
     }
 }
