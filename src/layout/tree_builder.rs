@@ -1,6 +1,9 @@
 use std::mem::take;
 
-use crate::style::{properties::text_align::TextAlign, types::StyledNode};
+use crate::style::{
+    properties::{height::Height, text_align::TextAlign},
+    types::StyledNode,
+};
 
 use super::types::{
     BoxDimensions, BoxType, EdgeSizes, FormattingContext, LayoutNode, Rectangle, WordBuilder,
@@ -25,9 +28,13 @@ impl LayoutTreeBuilder {
         let containing_block = &icb.box_dimensions;
         let child = icb.children.get_mut(0).unwrap();
 
-        self.compute_layout(child, containing_block);
+        let child_desired_height =
+            self.compute_desired_height(child, Option::Some(self.dimensions.1));
+
+        self.compute_layout(child, containing_block, child_desired_height);
 
         icb.box_dimensions.content.height = self.dimensions.1;
+        child.box_dimensions.content.height = self.dimensions.1;
 
         icb
     }
@@ -89,13 +96,16 @@ impl LayoutTreeBuilder {
         ans
     }
 
-    fn compute_layout(&self, node: &mut LayoutNode, containing_block: &BoxDimensions) {
+    fn compute_layout(
+        &self,
+        node: &mut LayoutNode,
+        containing_block: &BoxDimensions,
+        desired_height: Option<f32>,
+    ) {
         if let BoxType::Block(styled_node, ..) = &node.box_type {
-            self.compute_block_layout(node, styled_node, containing_block);
+            self.compute_block_layout(node, styled_node, containing_block, desired_height);
         } else if let BoxType::Anonymous = &node.box_type {
             self.compute_anonymous_layout(node, containing_block);
-        } else {
-            panic!("Inline layout is not supported yet!");
         }
     }
 
@@ -104,10 +114,11 @@ impl LayoutTreeBuilder {
         node: &mut LayoutNode,
         styled_node: &StyledNode,
         containing_block: &BoxDimensions,
+        desired_height: Option<f32>,
     ) {
         self.compute_width_block_layout(node, styled_node, containing_block);
         self.compute_position_block_layout(node, styled_node, containing_block);
-        self.compute_height_block_layout(node, styled_node);
+        self.compute_height_block_layout(node, desired_height);
     }
 
     fn compute_anonymous_layout(&self, node: &mut LayoutNode, containing_block: &BoxDimensions) {
@@ -116,7 +127,7 @@ impl LayoutTreeBuilder {
         node.box_dimensions.content.y =
             containing_block.content.y + containing_block.content.height;
 
-        self.handle_inline_formatting_context(node);
+        self.handle_inline_formatting_context(node, None);
     }
 
     fn compute_width_block_layout(
@@ -251,21 +262,23 @@ impl LayoutTreeBuilder {
             + node.box_dimensions.border.top;
     }
 
-    fn compute_height_block_layout(&self, node: &mut LayoutNode, styled_node: &StyledNode) {
+    fn compute_height_block_layout(&self, node: &mut LayoutNode, desired_height: Option<f32>) {
         let BoxType::Block(_, formatting_context) = &node.box_type else {
             panic!("Expected block box type");
         };
 
         if formatting_context == &FormattingContext::Inline {
-            self.handle_inline_formatting_context(node);
+            self.handle_inline_formatting_context(node, desired_height);
         } else {
-            self.handle_block_formatting_context(node, styled_node);
+            self.handle_block_formatting_context(node, desired_height);
         }
     }
 
-    fn handle_block_formatting_context(&self, node: &mut LayoutNode, styled_node: &StyledNode) {
+    fn handle_block_formatting_context(&self, node: &mut LayoutNode, desired_height: Option<f32>) {
         for child in &mut node.children {
-            self.compute_layout(child, &node.box_dimensions);
+            let child_desired_height = self.compute_desired_height(child, desired_height);
+
+            self.compute_layout(child, &node.box_dimensions, child_desired_height);
 
             node.box_dimensions.content.height += child.box_dimensions.margin.top
                 + child.box_dimensions.border.top
@@ -276,16 +289,12 @@ impl LayoutTreeBuilder {
                 + child.box_dimensions.margin.bottom;
         }
 
-        let height = styled_node.height();
-
-        if !height.is_auto() {
-            // TODO Height percentage depends on height of containing block (if declared)
-            node.box_dimensions.content.height =
-                height.actual_value(node.box_dimensions.content.width);
+        if let Some(height) = desired_height {
+            node.box_dimensions.content.height = height;
         }
     }
 
-    fn handle_inline_formatting_context(&self, node: &mut LayoutNode) {
+    fn handle_inline_formatting_context(&self, node: &mut LayoutNode, desired_height: Option<f32>) {
         if node.children.is_empty()
             || matches!(node.children[0].box_type, BoxType::Block(node, ..) if node.is_empty_text_node())
         {
@@ -392,7 +401,31 @@ impl LayoutTreeBuilder {
             }
         }
 
-        node.box_dimensions.content.height = acc_height;
+        if let Some(height) = desired_height {
+            node.box_dimensions.content.height = height;
+        } else {
+            node.box_dimensions.content.height = acc_height;
+        }
+    }
+
+    fn compute_desired_height(
+        &self,
+        node: &LayoutNode,
+        parent_desired_height: Option<f32>,
+    ) -> Option<f32> {
+        if let BoxType::Block(styled_node, ..) = &node.box_type {
+            let height = styled_node.height();
+
+            if height.is_auto() {
+                None
+            } else if let (Height::Percentage(_), None) = (height, parent_desired_height) {
+                None
+            } else {
+                Some(height.actual_value(parent_desired_height.unwrap_or(0.0)))
+            }
+        } else {
+            None
+        }
     }
 
     fn determine_text_alignment(&self, node: &LayoutNode) -> TextAlign {
