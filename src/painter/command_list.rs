@@ -1,7 +1,9 @@
 use crate::layout::types::{BoxType, LayoutNode};
 
 use super::{
-    commands::{draw_rectangle::DrawRectangle, draw_text::DrawText, Command},
+    commands::{
+        draw_border::DrawBorder, draw_rectangle::DrawRectangle, draw_text::DrawText, Command,
+    },
     fonts_context::FontsContext,
 };
 
@@ -22,6 +24,7 @@ impl CommandList {
 
     pub(crate) fn build_commands(&mut self, node: &LayoutNode, fonts_ctx: &mut FontsContext) {
         self.build_commands_for_background(node);
+        self.build_commands_for_border(node);
 
         if let BoxType::Word { .. } = node.box_type {
             self.build_commands_for_text(node, fonts_ctx);
@@ -29,6 +32,26 @@ impl CommandList {
             for child in &node.children {
                 self.build_commands(child, fonts_ctx);
             }
+        }
+    }
+
+    pub(crate) fn build_commands_for_border(&mut self, node: &LayoutNode) {
+        if let BoxType::Block(styled_node, ..) | BoxType::Inline(styled_node) = node.box_type {
+            let color = &styled_node.color().value();
+            let border_color = styled_node.border_color().actual_value(color);
+            let border_box = node.box_dimensions.border_box();
+            let border_width = styled_node
+                .border_width()
+                .actual_value(&styled_node.border_style().value());
+
+            self.commands.push(Box::new(DrawBorder::new(
+                border_box.x,
+                border_box.y,
+                border_box.width,
+                border_box.height,
+                border_width,
+                border_color.clone(),
+            )));
         }
     }
 

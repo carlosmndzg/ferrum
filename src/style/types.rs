@@ -3,12 +3,12 @@ use std::collections::HashMap;
 
 use crate::{
     style::properties::{
-        background_color::BackgroundColor, color::Color, font_size::FontSize,
-        font_weight::FontWeight, height::Height, line_height::LineHeight,
-        margin_bottom::MarginBottom, margin_left::MarginLeft, margin_right::MarginRight,
-        margin_top::MarginTop, padding_bottom::PaddingBottom, padding_left::PaddingLeft,
-        padding_right::PaddingRight, padding_top::PaddingTop, text_align::TextAlign, width::Width,
-        Property,
+        background_color::BackgroundColor, border_color::BorderColor, border_style::BorderStyle,
+        border_width::BorderWidth, color::Color, font_size::FontSize, font_weight::FontWeight,
+        height::Height, line_height::LineHeight, margin_bottom::MarginBottom,
+        margin_left::MarginLeft, margin_right::MarginRight, margin_top::MarginTop,
+        padding_bottom::PaddingBottom, padding_left::PaddingLeft, padding_right::PaddingRight,
+        padding_top::PaddingTop, text_align::TextAlign, width::Width, Property,
     },
     Element, Node, NodeType,
 };
@@ -98,6 +98,9 @@ impl StyledNode<'_> {
     generate_property_getter!(color, Color);
     generate_property_getter!(font_weight, FontWeight);
     generate_property_getter!(text_align, TextAlign);
+    generate_property_getter!(border_width, BorderWidth);
+    generate_property_getter!(border_color, BorderColor);
+    generate_property_getter!(border_style, BorderStyle);
 }
 
 #[derive(Debug, Default, PartialEq)]

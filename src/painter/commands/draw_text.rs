@@ -50,7 +50,7 @@ impl Command for DrawText {
             font,
             self.font_size,
             &self.text,
-            Point::new(self.x, self.y + self.font_size * 0.94),
+            Point::new(self.x, self.y),
             &source,
             &DrawOptions::new(),
         );

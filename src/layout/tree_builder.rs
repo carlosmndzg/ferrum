@@ -135,6 +135,12 @@ impl LayoutTreeBuilder {
         let padding_right = styled_node
             .padding_right()
             .actual_value(containing_block.content.width);
+        let border_left = styled_node
+            .border_width()
+            .actual_value(styled_node.border_style());
+        let border_right = styled_node
+            .border_width()
+            .actual_value(styled_node.border_style());
         let mut width = styled_node
             .width()
             .actual_value(containing_block.content.width);
@@ -145,7 +151,7 @@ impl LayoutTreeBuilder {
             .margin_right()
             .actual_value(containing_block.content.width);
 
-        let border_box_size = width + padding_left + padding_right;
+        let border_box_size = width + padding_left + padding_right + border_left + border_right;
 
         match (is_width_auto, is_margin_left_auto, is_margin_right_auto) {
             (false, true, true) | (false, true, false) | (false, false, true)
@@ -155,28 +161,36 @@ impl LayoutTreeBuilder {
                     - width
                     - margin_left
                     - padding_left
-                    - padding_right;
+                    - padding_right
+                    - border_left
+                    - border_right;
             }
             (true, _, _) => {
                 width = containing_block.content.width
                     - margin_left
                     - margin_right
                     - padding_left
-                    - padding_right;
+                    - padding_right
+                    - border_left
+                    - border_right;
             }
             (false, true, false) => {
                 margin_left = containing_block.content.width
                     - width
                     - margin_right
                     - padding_left
-                    - padding_right;
+                    - padding_right
+                    - border_left
+                    - border_right;
             }
             (false, false, true) => {
                 margin_right = containing_block.content.width
                     - width
                     - margin_left
                     - padding_left
-                    - padding_right;
+                    - padding_right
+                    - border_left
+                    - border_right;
             }
             (false, true, true) => {
                 margin_left = (containing_block.content.width - border_box_size) / 2.0;
@@ -187,6 +201,8 @@ impl LayoutTreeBuilder {
         node.box_dimensions.content.width = width;
         node.box_dimensions.padding.left = padding_left;
         node.box_dimensions.padding.right = padding_right;
+        node.box_dimensions.border.left = border_left;
+        node.box_dimensions.border.right = border_right;
         node.box_dimensions.margin.left = margin_left;
         node.box_dimensions.margin.right = margin_right;
     }
@@ -209,20 +225,30 @@ impl LayoutTreeBuilder {
         let padding_bottom = styled_node
             .padding_bottom()
             .actual_value(containing_block.content.width);
+        let border_top = styled_node
+            .border_width()
+            .actual_value(styled_node.border_style());
+        let border_bottom = styled_node
+            .border_width()
+            .actual_value(styled_node.border_style());
 
         node.box_dimensions.margin.top = margin_top;
         node.box_dimensions.margin.bottom = margin_bottom;
         node.box_dimensions.padding.top = padding_top;
         node.box_dimensions.padding.bottom = padding_bottom;
+        node.box_dimensions.border.top = border_top;
+        node.box_dimensions.border.bottom = border_bottom;
 
         node.box_dimensions.content.x = containing_block.content.x
             + node.box_dimensions.margin.left
-            + node.box_dimensions.padding.left;
+            + node.box_dimensions.padding.left
+            + node.box_dimensions.border.left;
 
         node.box_dimensions.content.y = containing_block.content.y
             + containing_block.content.height
             + node.box_dimensions.margin.top
-            + node.box_dimensions.padding.top;
+            + node.box_dimensions.padding.top
+            + node.box_dimensions.border.top;
     }
 
     fn compute_height_block_layout(&self, node: &mut LayoutNode, styled_node: &StyledNode) {
@@ -242,15 +268,18 @@ impl LayoutTreeBuilder {
             self.compute_layout(child, &node.box_dimensions);
 
             node.box_dimensions.content.height += child.box_dimensions.margin.top
+                + child.box_dimensions.border.top
                 + child.box_dimensions.padding.top
                 + child.box_dimensions.content.height
-                + child.box_dimensions.margin.bottom
                 + child.box_dimensions.padding.bottom
+                + child.box_dimensions.border.bottom
+                + child.box_dimensions.margin.bottom;
         }
 
         let height = styled_node.height();
 
         if !height.is_auto() {
+            // TODO Height percentage depends on height of containing block (if declared)
             node.box_dimensions.content.height =
                 height.actual_value(node.box_dimensions.content.width);
         }
@@ -356,10 +385,10 @@ impl LayoutTreeBuilder {
             acc_height += max;
 
             let initial_y = line.box_dimensions.content.y + line.box_dimensions.content.height
-                - ((line.box_dimensions.content.height - max_font_size) / 2.0);
+                - ((line.box_dimensions.content.height * 1.1 - max_font_size) / 2.);
 
             for word in &mut line.children {
-                word.box_dimensions.content.y = initial_y - word.box_dimensions.content.height;
+                word.box_dimensions.content.y = initial_y;
             }
         }
 

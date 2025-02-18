@@ -1,4 +1,7 @@
 use background_color::BackgroundColor;
+use border_color::BorderColor;
+use border_style::BorderStyle;
+use border_width::BorderWidth;
 use color::Color;
 use display::Display;
 use font_size::FontSize;
@@ -18,7 +21,7 @@ use width::Width;
 
 use crate::css::types::Declaration;
 
-pub(crate) const AVAILABLE_PROPERTIES: [&str; 17] = [
+pub(crate) const AVAILABLE_PROPERTIES: [&str; 20] = [
     "color",
     "display",
     "width",
@@ -36,6 +39,9 @@ pub(crate) const AVAILABLE_PROPERTIES: [&str; 17] = [
     "line-height",
     "font-weight",
     "text-align",
+    "border-width",
+    "border-color",
+    "border-style",
 ];
 pub(crate) const INHERITABLE_PROPERTIES: [&str; 5] = [
     "color",
@@ -46,6 +52,9 @@ pub(crate) const INHERITABLE_PROPERTIES: [&str; 5] = [
 ];
 
 pub(crate) mod background_color;
+pub(crate) mod border_color;
+pub(crate) mod border_style;
+pub(crate) mod border_width;
 pub(crate) mod color;
 pub(crate) mod display;
 pub(crate) mod font_size;
@@ -109,6 +118,15 @@ impl PropertyFactory {
             "text-align" => Some(Property::TextAlign(TextAlign::maybe_new(
                 &declaration.value,
             )?)),
+            "border-width" => Some(Property::BorderWidth(BorderWidth::maybe_new(
+                &declaration.value,
+            )?)),
+            "border-color" => Some(Property::BorderColor(BorderColor::maybe_new(
+                &declaration.value,
+            )?)),
+            "border-style" => Some(Property::BorderStyle(BorderStyle::maybe_new(
+                &declaration.value,
+            )?)),
             _ => None,
         }
     }
@@ -132,6 +150,9 @@ impl PropertyFactory {
             "line-height" => Property::LineHeight(LineHeight::default()),
             "font-weight" => Property::FontWeight(FontWeight::default()),
             "text-align" => Property::TextAlign(TextAlign::default()),
+            "border-width" => Property::BorderWidth(BorderWidth::default()),
+            "border-color" => Property::BorderColor(BorderColor::default()),
+            "border-style" => Property::BorderStyle(BorderStyle::default()),
             _ => panic!("Unknown property \"{}\"", name),
         }
     }
@@ -156,6 +177,9 @@ pub(crate) enum Property {
     LineHeight(LineHeight),
     FontWeight(FontWeight),
     TextAlign(TextAlign),
+    BorderWidth(BorderWidth),
+    BorderColor(BorderColor),
+    BorderStyle(BorderStyle),
 }
 
 impl Property {
@@ -178,6 +202,9 @@ impl Property {
             Property::LineHeight(line_height) => line_height.name(),
             Property::FontWeight(font_weight) => font_weight.name(),
             Property::TextAlign(text_align) => text_align.name(),
+            Property::BorderWidth(border_width) => border_width.name(),
+            Property::BorderColor(border_color) => border_color.name(),
+            Property::BorderStyle(border_style) => border_style.name(),
         }
     }
 }

@@ -2,6 +2,7 @@ use raqote::DrawTarget;
 
 use super::fonts_context::FontsContext;
 
+pub(crate) mod draw_border;
 pub(crate) mod draw_rectangle;
 pub(crate) mod draw_text;
 
