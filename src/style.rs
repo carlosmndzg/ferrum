@@ -70,7 +70,6 @@ fn find_styles<'a>(
 ) -> Styles {
     let mut styles = Styles::default();
 
-    // Apply styles for "style" attribute
     let style_attribute_declarations = find_style_attribute_declarations(node);
 
     for declaration in style_attribute_declarations {
