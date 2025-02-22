@@ -51,7 +51,6 @@ pub(crate) struct Specificity {
     pub(crate) a: u32,
     pub(crate) b: u32,
     pub(crate) c: u32,
-    pub(crate) d: u32,
 }
 
 impl Eq for Specificity {}
@@ -88,11 +87,11 @@ impl SimpleSelector {
     }
 
     pub(crate) fn specificity(&self) -> Specificity {
-        let b = if self.id.is_some() { 1 } else { 0 };
-        let c = self.class.len() as u32;
-        let d = self.tag_name.as_ref().map_or(0, |_| 1);
+        let a = if self.id.is_some() { 1 } else { 0 };
+        let b = self.class.len() as u32;
+        let c = self.tag_name.as_ref().map_or(0, |_| 1);
 
-        Specificity { a: 0, b, c, d }
+        Specificity { a, b, c }
     }
 
     pub(crate) fn matches(&self, tag_name: &str, id: Option<&str>, classes: &[String]) -> bool {
