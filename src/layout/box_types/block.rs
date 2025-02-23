@@ -23,54 +23,55 @@ impl Block<'_> {
         desired_height: Option<f32>,
         file_path: &Path,
     ) {
-        self.compute_width(node, self.node, containing_block, desired_height, file_path);
-        self.compute_position(node, self.node, containing_block);
+        self.compute_width(node, containing_block, desired_height, file_path);
+        self.compute_position(node, containing_block);
         self.compute_height(node, desired_height, file_path);
     }
 
     fn compute_width(
         &self,
         node: &mut LayoutNode,
-        styled_node: &StyledNode,
         containing_block: &BoxDimensions,
         desired_height: Option<f32>,
         file_path: &Path,
     ) {
-        let mut is_width_auto = styled_node.width().is_auto();
-        let is_margin_left_auto = styled_node.margin_left().is_auto();
-        let is_margin_right_auto = styled_node.margin_right().is_auto();
+        let mut is_width_auto = self.node.width().is_auto();
+        let is_margin_left_auto = self.node.margin_left().is_auto();
+        let is_margin_right_auto = self.node.margin_right().is_auto();
 
-        let padding_left = styled_node
+        let padding_left = self
+            .node
             .padding_left()
             .actual_value(containing_block.content.width);
-        let padding_right = styled_node
+        let padding_right = self
+            .node
             .padding_right()
             .actual_value(containing_block.content.width);
-        let border_left = styled_node
+        let border_left = self
+            .node
             .border_width()
-            .actual_value(styled_node.border_style());
-        let border_right = styled_node
+            .actual_value(self.node.border_style());
+        let border_right = self
+            .node
             .border_width()
-            .actual_value(styled_node.border_style());
-        let mut width = styled_node
+            .actual_value(self.node.border_style());
+        let mut width = self
+            .node
             .width()
             .actual_value(containing_block.content.width);
-        let mut margin_left = styled_node
+        let mut margin_left = self
+            .node
             .margin_left()
             .actual_value(containing_block.content.width);
-        let mut margin_right = styled_node
+        let mut margin_right = self
+            .node
             .margin_right()
             .actual_value(containing_block.content.width);
 
-        if node.is_replaced_element() {
+        if self.node.is_replaced_element() {
             is_width_auto = false;
 
-            width = self.compute_width_replace_element(
-                styled_node,
-                containing_block,
-                desired_height,
-                file_path,
-            );
+            width = self.compute_width_replace_element(containing_block, desired_height, file_path);
         }
 
         let border_box_size = width + padding_left + padding_right + border_left + border_right;
@@ -131,19 +132,19 @@ impl Block<'_> {
 
     fn compute_width_replace_element(
         &self,
-        styled_node: &StyledNode,
         containing_block: &BoxDimensions,
         desired_height: Option<f32>,
         file_path: &Path,
     ) -> f32 {
-        let is_width_auto = styled_node.width().is_auto();
-        let is_height_auto = styled_node.height().is_auto();
-        let declared_width = styled_node
+        let is_width_auto = self.node.width().is_auto();
+        let is_height_auto = self.node.height().is_auto();
+        let declared_width = self
+            .node
             .width()
             .actual_value(containing_block.content.width);
 
         let (intrinsic_width, intrinsic_height) =
-            self.intrinsic_image_dimensions(styled_node, file_path);
+            self.intrinsic_image_dimensions(self.node, file_path);
         let intrinsic_ratio = intrinsic_width / intrinsic_height;
 
         if is_width_auto && is_height_auto {
@@ -178,30 +179,31 @@ impl Block<'_> {
         (image.width() as f32, image.height() as f32)
     }
 
-    fn compute_position(
-        &self,
-        node: &mut LayoutNode,
-        styled_node: &StyledNode,
-        containing_block: &BoxDimensions,
-    ) {
-        let margin_top = styled_node
+    fn compute_position(&self, node: &mut LayoutNode, containing_block: &BoxDimensions) {
+        let margin_top = self
+            .node
             .margin_top()
             .actual_value(containing_block.content.width);
-        let margin_bottom = styled_node
+        let margin_bottom = self
+            .node
             .margin_bottom()
             .actual_value(containing_block.content.width);
-        let padding_top = styled_node
+        let padding_top = self
+            .node
             .padding_top()
             .actual_value(containing_block.content.width);
-        let padding_bottom = styled_node
+        let padding_bottom = self
+            .node
             .padding_bottom()
             .actual_value(containing_block.content.width);
-        let border_top = styled_node
+        let border_top = self
+            .node
             .border_width()
-            .actual_value(styled_node.border_style());
-        let border_bottom = styled_node
+            .actual_value(self.node.border_style());
+        let border_bottom = self
+            .node
             .border_width()
-            .actual_value(styled_node.border_style());
+            .actual_value(self.node.border_style());
 
         node.box_dimensions.margin.top = margin_top;
         node.box_dimensions.margin.bottom = margin_bottom;
@@ -223,7 +225,7 @@ impl Block<'_> {
     }
 
     fn compute_height(&self, node: &mut LayoutNode, desired_height: Option<f32>, file_path: &Path) {
-        if node.is_replaced_element() {
+        if self.node.is_replaced_element() {
             self.compute_height_replaced_element(node, desired_height, file_path);
         } else {
             self.formatting_context.handle(

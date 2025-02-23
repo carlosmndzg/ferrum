@@ -90,7 +90,11 @@ impl<'a> LayoutNode<'a> {
     }
 
     pub(crate) fn is_replaced_element(&self) -> bool {
-        if let BoxType::Block(Block { node, .. }) = &self.box_type {
+        if let BoxType::Temporal = self.box_type {
+            panic!("This function can only be invoked after the layout has been computed!");
+        }
+
+        if let BoxType::Block(Block { node, .. }) = self.box_type {
             node.is_replaced_element()
         } else {
             false
