@@ -1,4 +1,7 @@
-use crate::layout::types::{BoxType, LayoutNode};
+use crate::layout::{
+    box_types::{block::Block, inline::Inline, word::Word},
+    types::{BoxType, LayoutNode},
+};
 
 use super::{
     commands::{
@@ -36,7 +39,14 @@ impl CommandList {
     }
 
     pub(crate) fn build_commands_for_border(&mut self, node: &LayoutNode) {
-        if let BoxType::Block(styled_node, ..) | BoxType::Inline(styled_node) = node.box_type {
+        if let BoxType::Block(
+            Block {
+                node: styled_node, ..
+            },
+            ..,
+        )
+        | BoxType::Inline(Inline { node: styled_node }) = node.box_type
+        {
             let color = &styled_node.color().value();
             let border_color = styled_node.border_color().actual_value(color);
             let border_box = node.box_dimensions.border_box();
@@ -56,7 +66,14 @@ impl CommandList {
     }
 
     pub(crate) fn build_commands_for_background(&mut self, node: &LayoutNode) {
-        if let BoxType::Block(styled_node, ..) | BoxType::Inline(styled_node) = node.box_type {
+        if let BoxType::Block(
+            Block {
+                node: styled_node, ..
+            },
+            ..,
+        )
+        | BoxType::Inline(Inline { node: styled_node }) = node.box_type
+        {
             let background_color = styled_node.background_color().value();
             let padding_box = node.box_dimensions.padding_box();
 
@@ -75,13 +92,13 @@ impl CommandList {
         node: &LayoutNode,
         fonts_ctx: &mut FontsContext,
     ) {
-        let BoxType::Word {
+        let BoxType::Word(Word {
             text,
             font_size,
             font_weight,
             color,
             ..
-        } = &node.box_type
+        }) = &node.box_type
         else {
             return;
         };

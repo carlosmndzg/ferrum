@@ -1,0 +1,163 @@
+use crate::{
+    layout::{
+        formatting_context::FormattingContext,
+        types::{BoxDimensions, LayoutNode},
+    },
+    style::types::StyledNode,
+};
+
+#[derive(Debug, PartialEq)]
+pub(crate) struct Block<'a> {
+    pub(crate) node: &'a StyledNode<'a>,
+    pub(crate) formatting_context: FormattingContext,
+}
+
+impl Block<'_> {
+    pub(crate) fn compute_layout(
+        &self,
+        node: &mut LayoutNode,
+        containing_block: &BoxDimensions,
+        desired_height: Option<f32>,
+    ) {
+        self.compute_width(node, self.node, containing_block);
+        self.compute_position(node, self.node, containing_block);
+        self.compute_height(node, desired_height);
+    }
+
+    fn compute_width(
+        &self,
+        node: &mut LayoutNode,
+        styled_node: &StyledNode,
+        containing_block: &BoxDimensions,
+    ) {
+        let is_width_auto = styled_node.width().is_auto();
+        let is_margin_left_auto = styled_node.margin_left().is_auto();
+        let is_margin_right_auto = styled_node.margin_right().is_auto();
+
+        let padding_left = styled_node
+            .padding_left()
+            .actual_value(containing_block.content.width);
+        let padding_right = styled_node
+            .padding_right()
+            .actual_value(containing_block.content.width);
+        let border_left = styled_node
+            .border_width()
+            .actual_value(styled_node.border_style());
+        let border_right = styled_node
+            .border_width()
+            .actual_value(styled_node.border_style());
+        let mut width = styled_node
+            .width()
+            .actual_value(containing_block.content.width);
+        let mut margin_left = styled_node
+            .margin_left()
+            .actual_value(containing_block.content.width);
+        let mut margin_right = styled_node
+            .margin_right()
+            .actual_value(containing_block.content.width);
+
+        let border_box_size = width + padding_left + padding_right + border_left + border_right;
+
+        match (is_width_auto, is_margin_left_auto, is_margin_right_auto) {
+            (false, true, true) | (false, true, false) | (false, false, true)
+                if border_box_size > containing_block.content.width => {}
+            (false, false, false) => {
+                margin_right = containing_block.content.width
+                    - width
+                    - margin_left
+                    - padding_left
+                    - padding_right
+                    - border_left
+                    - border_right;
+            }
+            (true, _, _) => {
+                width = containing_block.content.width
+                    - margin_left
+                    - margin_right
+                    - padding_left
+                    - padding_right
+                    - border_left
+                    - border_right;
+            }
+            (false, true, false) => {
+                margin_left = containing_block.content.width
+                    - width
+                    - margin_right
+                    - padding_left
+                    - padding_right
+                    - border_left
+                    - border_right;
+            }
+            (false, false, true) => {
+                margin_right = containing_block.content.width
+                    - width
+                    - margin_left
+                    - padding_left
+                    - padding_right
+                    - border_left
+                    - border_right;
+            }
+            (false, true, true) => {
+                margin_left = (containing_block.content.width - border_box_size) / 2.0;
+                margin_right = margin_left;
+            }
+        }
+
+        node.box_dimensions.content.width = width;
+        node.box_dimensions.padding.left = padding_left;
+        node.box_dimensions.padding.right = padding_right;
+        node.box_dimensions.border.left = border_left;
+        node.box_dimensions.border.right = border_right;
+        node.box_dimensions.margin.left = margin_left;
+        node.box_dimensions.margin.right = margin_right;
+    }
+
+    fn compute_position(
+        &self,
+        node: &mut LayoutNode,
+        styled_node: &StyledNode,
+        containing_block: &BoxDimensions,
+    ) {
+        let margin_top = styled_node
+            .margin_top()
+            .actual_value(containing_block.content.width);
+        let margin_bottom = styled_node
+            .margin_bottom()
+            .actual_value(containing_block.content.width);
+        let padding_top = styled_node
+            .padding_top()
+            .actual_value(containing_block.content.width);
+        let padding_bottom = styled_node
+            .padding_bottom()
+            .actual_value(containing_block.content.width);
+        let border_top = styled_node
+            .border_width()
+            .actual_value(styled_node.border_style());
+        let border_bottom = styled_node
+            .border_width()
+            .actual_value(styled_node.border_style());
+
+        node.box_dimensions.margin.top = margin_top;
+        node.box_dimensions.margin.bottom = margin_bottom;
+        node.box_dimensions.padding.top = padding_top;
+        node.box_dimensions.padding.bottom = padding_bottom;
+        node.box_dimensions.border.top = border_top;
+        node.box_dimensions.border.bottom = border_bottom;
+
+        node.box_dimensions.content.x = containing_block.content.x
+            + node.box_dimensions.margin.left
+            + node.box_dimensions.padding.left
+            + node.box_dimensions.border.left;
+
+        node.box_dimensions.content.y = containing_block.content.y
+            + containing_block.content.height
+            + node.box_dimensions.margin.top
+            + node.box_dimensions.padding.top
+            + node.box_dimensions.border.top;
+    }
+
+    fn compute_height(&self, node: &mut LayoutNode, desired_height: Option<f32>) {
+        self.formatting_context
+            .handle(node, &self.node.text_align().value(), desired_height);
+    }
+}

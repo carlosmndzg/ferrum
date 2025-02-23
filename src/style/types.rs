@@ -2,6 +2,11 @@ use core::fmt;
 use std::collections::HashMap;
 
 use crate::{
+    layout::{
+        box_types::{block::Block, inline::Inline},
+        formatting_context::FormattingContext,
+        types::BoxType,
+    },
     style::properties::{
         background_color::BackgroundColor, border_color::BorderColor, border_style::BorderStyle,
         border_width::BorderWidth, color::Color, font_size::FontSize, font_weight::FontWeight,
@@ -79,6 +84,47 @@ impl StyledNode<'_> {
 
     pub(crate) fn is_inline_level(&self) -> bool {
         self.display() == &Display::Inline
+    }
+
+    pub(crate) fn box_type(&self, formatting_context: FormattingContext) -> BoxType {
+        if self.is_inline_level() {
+            BoxType::Inline(Inline { node: self })
+        } else {
+            BoxType::Block(Block {
+                node: self,
+                formatting_context,
+            })
+        }
+    }
+
+    pub(crate) fn is_inline_in_block_context(
+        &self,
+        formatting_context: &FormattingContext,
+    ) -> bool {
+        self.is_inline_level()
+            && !self.children.is_empty()
+            && formatting_context == &FormattingContext::Block
+    }
+
+    pub(crate) fn children_displayed(&self) -> Vec<&StyledNode> {
+        self.children
+            .iter()
+            .filter(|child| !child.has_display_none())
+            .collect()
+    }
+
+    pub(crate) fn formatting_context(&self) -> FormattingContext {
+        let children = self.children_displayed();
+
+        if children.is_empty() {
+            return FormattingContext::Block;
+        }
+
+        if children.iter().any(|child| child.is_block_level()) {
+            FormattingContext::Block
+        } else {
+            FormattingContext::Inline
+        }
     }
 
     generate_property_getter!(display, Display);
