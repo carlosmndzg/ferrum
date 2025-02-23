@@ -74,6 +74,14 @@ impl StyledNode<'_> {
         false
     }
 
+    pub(crate) fn is_replaced_element(&self) -> bool {
+        if let NodeType::Element(Element { tag_name, .. }) = &self.node.node_type {
+            return tag_name == "img";
+        }
+
+        false
+    }
+
     pub(crate) fn has_display_none(&self) -> bool {
         self.display() == &Display::None
     }

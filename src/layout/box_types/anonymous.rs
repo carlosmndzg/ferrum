@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::{
     layout::{
         formatting_context::FormattingContext,
@@ -12,10 +14,15 @@ use super::inline::Inline;
 pub(crate) struct Anonymous;
 
 impl Anonymous {
-    pub(crate) fn compute_layout(&self, node: &mut LayoutNode, containing_block: &BoxDimensions) {
+    pub(crate) fn compute_layout(
+        &self,
+        node: &mut LayoutNode,
+        containing_block: &BoxDimensions,
+        file_path: &Path,
+    ) {
         self.compute_width(node, containing_block);
         self.compute_position(node, containing_block);
-        self.compute_height(node);
+        self.compute_height(node, file_path);
     }
 
     pub(crate) fn compute_width(&self, node: &mut LayoutNode, containing_block: &BoxDimensions) {
@@ -28,10 +35,10 @@ impl Anonymous {
             containing_block.content.y + containing_block.content.height;
     }
 
-    pub(crate) fn compute_height(&self, node: &mut LayoutNode) {
+    pub(crate) fn compute_height(&self, node: &mut LayoutNode, file_path: &Path) {
         let text_alignment = &self.text_alignment(node);
 
-        FormattingContext::Inline.handle(node, text_alignment, None);
+        FormattingContext::Inline.handle(node, text_alignment, None, file_path);
     }
 
     pub(crate) fn text_alignment(&self, node: &LayoutNode) -> TextAlign {

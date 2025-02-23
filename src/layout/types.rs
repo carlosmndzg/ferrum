@@ -1,5 +1,5 @@
 use core::{fmt, panic};
-use std::mem;
+use std::{mem, path::Path};
 
 use crate::{
     style::{
@@ -66,9 +66,10 @@ impl<'a> LayoutNode<'a> {
         &mut self,
         containing_block: &BoxDimensions,
         desired_height: Option<f32>,
+        file_path: &Path,
     ) {
         let box_type = mem::replace(&mut self.box_type, BoxType::Temporal);
-        box_type.compute_layout(self, containing_block, desired_height);
+        box_type.compute_layout(self, containing_block, desired_height, file_path);
         self.box_type = box_type;
     }
 
@@ -85,6 +86,14 @@ impl<'a> LayoutNode<'a> {
             }
         } else {
             None
+        }
+    }
+
+    pub(crate) fn is_replaced_element(&self) -> bool {
+        if let BoxType::Block(Block { node, .. }) = &self.box_type {
+            node.is_replaced_element()
+        } else {
+            false
         }
     }
 }
@@ -205,13 +214,14 @@ impl BoxType<'_> {
         layout_node: &mut LayoutNode,
         containing_block: &BoxDimensions,
         desired_height: Option<f32>,
+        file_path: &Path,
     ) {
         match self {
             BoxType::Block(block) => {
-                block.compute_layout(layout_node, containing_block, desired_height)
+                block.compute_layout(layout_node, containing_block, desired_height, file_path)
             }
             BoxType::Anonymous(anonymous) => {
-                anonymous.compute_layout(layout_node, containing_block)
+                anonymous.compute_layout(layout_node, containing_block, file_path)
             }
             _ => {}
         }

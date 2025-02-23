@@ -9,6 +9,7 @@ debug = true
 [dependencies]
 ego-tree = "0.10.0"
 font-kit = "0.14.2"
+image = "0.25.5"
 minifb = "0.28.0"
 raqote = "0.8.5"
 scraper = "0.22.0"

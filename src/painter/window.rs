@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use minifb::Window as MinifbWindow;
 use raqote::{DrawTarget, SolidSource};
 
@@ -17,10 +19,10 @@ impl Window {
         Self { window }
     }
 
-    pub(crate) fn run(&mut self, root: &LayoutNode) {
+    pub(crate) fn run(&mut self, root: &LayoutNode, file_path: &Path) {
         let mut font_ctx = FontsContext::new();
         let reference = &mut font_ctx;
-        let commands = CommandList::new(root, reference);
+        let commands = CommandList::new(root, reference, file_path);
 
         let size = self.window.get_size();
         let mut dt = DrawTarget::new(size.0 as i32, size.1 as i32);

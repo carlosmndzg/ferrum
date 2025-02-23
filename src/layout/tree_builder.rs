@@ -1,14 +1,20 @@
+use std::path::Path;
+
 use crate::style::types::StyledNode;
 
 use super::types::{BoxDimensions, EdgeSizes, LayoutNode, Rectangle};
 
-pub(crate) struct LayoutTreeBuilder {
+pub(crate) struct LayoutTreeBuilder<'a> {
     dimensions: (f32, f32),
+    file_path: &'a Path,
 }
 
-impl LayoutTreeBuilder {
-    pub fn new(dimensions: (f32, f32)) -> Self {
-        LayoutTreeBuilder { dimensions }
+impl LayoutTreeBuilder<'_> {
+    pub fn new(dimensions: (f32, f32), file_path: &Path) -> LayoutTreeBuilder {
+        LayoutTreeBuilder {
+            dimensions,
+            file_path,
+        }
     }
 
     pub fn build<'a>(&mut self, root: &'a StyledNode) -> LayoutNode<'a> {
@@ -22,7 +28,7 @@ impl LayoutTreeBuilder {
         let child = icb.children.get_mut(0).unwrap();
         let child_desired_height = child.compute_desired_height(Option::Some(self.dimensions.1));
 
-        child.compute_layout(containing_block, child_desired_height);
+        child.compute_layout(containing_block, child_desired_height, self.file_path);
 
         icb.box_dimensions.content.height = self.dimensions.1;
         child.box_dimensions.content.height = self.dimensions.1;

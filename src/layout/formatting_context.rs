@@ -1,4 +1,4 @@
-use std::{collections::HashMap, mem::take};
+use std::{collections::HashMap, mem::take, path::Path};
 
 use font_kit::{
     family_name::FamilyName,
@@ -29,18 +29,19 @@ impl FormattingContext {
         node: &mut LayoutNode,
         text_alignment: &TextAlign,
         desired_height: Option<f32>,
+        file_path: &Path,
     ) {
         match self {
-            FormattingContext::Block => self.handle_block(node, desired_height),
+            FormattingContext::Block => self.handle_block(node, desired_height, file_path),
             FormattingContext::Inline => self.handle_inline(node, text_alignment, desired_height),
         }
     }
 
-    fn handle_block(&self, node: &mut LayoutNode, desired_height: Option<f32>) {
+    fn handle_block(&self, node: &mut LayoutNode, desired_height: Option<f32>, file_path: &Path) {
         for child in &mut node.children {
             let child_desired_height = child.compute_desired_height(desired_height);
 
-            child.compute_layout(&node.box_dimensions, child_desired_height);
+            child.compute_layout(&node.box_dimensions, child_desired_height, file_path);
 
             node.box_dimensions.content.height += child.box_dimensions.margin.top
                 + child.box_dimensions.border.top
@@ -62,6 +63,10 @@ impl FormattingContext {
         text_alignment: &TextAlign,
         desired_height: Option<f32>,
     ) {
+        if node.is_replaced_element() {
+            panic!("Replaced elements are not supported in inline formatting context");
+        }
+
         if node.children.is_empty()
             || matches!(node.children[0].box_type, BoxType::Block(Block { node, .. }, ..) if node.is_empty_text_node())
         {
