@@ -40,7 +40,8 @@ impl Command for DrawImage {
         for (x, y, pixel) in img.to_rgba8().enumerate_pixels() {
             let idx = (y * img_width + x) as usize;
             let [r, g, b, a] = pixel.0;
-            argb_data[idx] = (a as u32) << 24 | (r as u32) << 16 | (g as u32) << 8 | (b as u32);
+            argb_data[idx] =
+                ((a as u32) << 24) | ((r as u32) << 16) | ((g as u32) << 8) | (b as u32);
         }
 
         let image = Image {

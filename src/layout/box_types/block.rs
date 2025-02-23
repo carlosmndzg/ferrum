@@ -1,5 +1,7 @@
 use std::path::Path;
 
+use image::GenericImageView;
+
 use crate::{
     layout::{
         formatting_context::FormattingContext,
@@ -174,9 +176,15 @@ impl Block<'_> {
         };
 
         let path = folder.join(src);
-        let image = image::open(path).unwrap();
+        let image = image::open(path);
 
-        (image.width() as f32, image.height() as f32)
+        if let Ok(image) = image {
+            let dimensions = image.dimensions();
+
+            (dimensions.0 as f32, dimensions.1 as f32)
+        } else {
+            (0.0, 0.0)
+        }
     }
 
     fn compute_position(&self, node: &mut LayoutNode, containing_block: &BoxDimensions) {
@@ -250,10 +258,15 @@ impl Block<'_> {
         } else {
             let (intrinsic_width, intrinsic_height) =
                 self.intrinsic_image_dimensions(styled_node, file_path);
-            let intrinsic_ratio = intrinsic_width / intrinsic_height;
 
-            node.box_dimensions.content.height =
-                node.box_dimensions.content.width / intrinsic_ratio;
+            if intrinsic_height == 0.0 {
+                node.box_dimensions.content.height = 0.0;
+            } else {
+                let intrinsic_ratio = intrinsic_width / intrinsic_height;
+
+                node.box_dimensions.content.height =
+                    node.box_dimensions.content.width / intrinsic_ratio;
+            }
         }
     }
 }

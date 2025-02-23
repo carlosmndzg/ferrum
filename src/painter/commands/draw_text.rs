@@ -44,8 +44,6 @@ impl Command for DrawText {
 
         let font = font_ctx.get_font(self.font_weight);
 
-        // 0.98 is a micro adjustment because raqote draws text a bit smaller.
-
         dt.draw_text(
             font,
             self.font_size,
