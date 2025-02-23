@@ -63,10 +63,6 @@ impl FormattingContext {
         text_alignment: &TextAlign,
         desired_height: Option<f32>,
     ) {
-        if node.is_replaced_element() {
-            panic!("Replaced elements are not supported in inline formatting context");
-        }
-
         if node.children.is_empty()
             || matches!(node.children[0].box_type, BoxType::Block(Block { node, .. }, ..) if node.is_empty_text_node())
         {
