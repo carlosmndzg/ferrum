@@ -113,7 +113,7 @@ impl CommandList {
             return;
         };
 
-        let Some(src) = element.get_attribute("src") else {
+        let Some(src) = element.attributes().get("src") else {
             return;
         };
 

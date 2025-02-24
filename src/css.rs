@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use parser::CssParser;
 use types::{Declaration, Rule, Stylesheet};
 
-use crate::{Node, NodeType, Text};
+use crate::{Node, NodeType};
 
 pub(crate) mod parser;
 pub(crate) mod types;
@@ -32,7 +32,7 @@ fn parse_node(node: &Node, rules: &mut Vec<Rule>, file_path: &Path) {
     let node_type = &node.node_type;
 
     if let NodeType::Element(element) = node_type {
-        let tag_name = element.tag_name.as_str();
+        let tag_name = element.tag_name();
 
         if tag_name == "style" {
             handle_style_node(node, rules);
@@ -48,10 +48,11 @@ fn parse_node(node: &Node, rules: &mut Vec<Rule>, file_path: &Path) {
 
 fn handle_style_node(node: &Node, rules: &mut Vec<Rule>) {
     if let Some(Node {
-        node_type: NodeType::Text(Text { text }),
+        node_type: NodeType::Text(text),
         ..
     }) = &node.children.first()
     {
+        let text = text.get();
         let mut parser = CssParser::new(text);
 
         let stylesheet = parser.parse();
@@ -62,7 +63,7 @@ fn handle_style_node(node: &Node, rules: &mut Vec<Rule>) {
 
 fn handle_link_node(node: &Node, rules: &mut Vec<Rule>, file_path: &Path) {
     if let NodeType::Element(element) = &node.node_type {
-        let Some(href) = element.get_attribute("href") else {
+        let Some(href) = element.attributes().get("href") else {
             return;
         };
 

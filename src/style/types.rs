@@ -15,7 +15,7 @@ use crate::{
         padding_bottom::PaddingBottom, padding_left::PaddingLeft, padding_right::PaddingRight,
         padding_top::PaddingTop, text_align::TextAlign, width::Width, Property,
     },
-    Element, Node, NodeType,
+    Node, NodeType,
 };
 
 use super::properties::display::Display;
@@ -60,23 +60,23 @@ impl StyledNode<'_> {
 
     fn node_type_summary(&self, node_type: &NodeType) -> String {
         match node_type {
-            NodeType::Element(Element { tag_name, .. }) => tag_name.clone(),
-            NodeType::Text(text) => text.text.clone(),
+            NodeType::Element(element) => element.tag_name().to_string(),
+            NodeType::Text(text) => text.get().to_string(),
             _ => String::new(),
         }
     }
 
     pub(crate) fn is_empty_text_node(&self) -> bool {
         if let NodeType::Text(text) = &self.node.node_type {
-            return text.text.trim().is_empty();
+            return text.get().trim().is_empty();
         }
 
         false
     }
 
     pub(crate) fn is_replaced_element(&self) -> bool {
-        if let NodeType::Element(Element { tag_name, .. }) = &self.node.node_type {
-            return tag_name == "img";
+        if let NodeType::Element(element) = &self.node.node_type {
+            return element.tag_name() == "img";
         }
 
         false

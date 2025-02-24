@@ -1,20 +1,84 @@
-use crate::dom::Node;
-use parser::HtmlParser;
-use scraper::Html;
-
-mod parser;
+use crate::{
+    dom::{Attributes, Comment, DocType, Document, Node},
+    Element, NodeType, Text,
+};
+use ego_tree::{iter::Children, NodeRef};
+use scraper::{node::Attrs, ElementRef, Html};
 
 pub(crate) fn parse(html: &str) -> Node {
-    let dom = Html::parse_document(html);
-    let parser = HtmlParser;
+    Html::parse_document(html).into()
+}
 
-    parser.convert_dom(&dom.root_element())
+impl From<Html> for Node {
+    fn from(html: Html) -> Self {
+        html.root_element().into()
+    }
+}
+
+impl From<ElementRef<'_>> for Node {
+    fn from(element: ElementRef) -> Self {
+        let (element, children) = (element.value(), element.children());
+        let tag_name = element.name().to_string();
+        let attributes = element.attrs().into();
+        let children = children.map(Node::try_from).filter_map(Result::ok);
+        let node_type = NodeType::Element(Element::new(tag_name, attributes));
+        let html_element = Node::new(node_type, children.collect());
+
+        Node::new(NodeType::Document(Document::new()), vec![html_element])
+    }
+}
+
+impl From<Children<'_, scraper::Node>> for Node {
+    fn from(children: Children<'_, scraper::Node>) -> Self {
+        let children = children
+            .map(Node::try_from)
+            .filter_map(Result::ok)
+            .collect();
+
+        Node::new(NodeType::Document(Document::new()), children)
+    }
+}
+
+impl From<Attrs<'_>> for Attributes {
+    fn from(attrs: Attrs) -> Self {
+        Attributes::from_iter(attrs)
+    }
+}
+
+impl TryFrom<NodeRef<'_, scraper::Node>> for Node {
+    type Error = ();
+
+    fn try_from(node: NodeRef<'_, scraper::Node>) -> Result<Self, Self::Error> {
+        match node.value() {
+            scraper::Node::Element(element) => {
+                let tag_name = element.name().to_string();
+                let attributes = element.attrs().into();
+                let children = node.children().map(Node::try_from).filter_map(Result::ok);
+
+                Ok(Node::new(
+                    NodeType::Element(Element::new(tag_name, attributes)),
+                    children.collect(),
+                ))
+            }
+            scraper::Node::Text(text) => Ok(Node::new(
+                NodeType::Text(Text::new(text.to_string())),
+                vec![],
+            )),
+            scraper::Node::Comment(comment) => Ok(Node::new(
+                NodeType::Comment(Comment::new(comment.to_string())),
+                vec![],
+            )),
+            scraper::Node::Doctype(doctype) => Ok(Node::new(
+                NodeType::DocType(DocType::new(doctype.name().to_string())),
+                vec![],
+            )),
+            _ => Err(()),
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::dom::{Attribute, NodeFactory};
-
     use super::*;
 
     #[test]
@@ -24,14 +88,31 @@ mod tests {
 
         assert_eq!(
             dom,
-            NodeFactory::create_document(vec![NodeFactory::create_element(
-                "html".to_string(),
-                vec![],
-                vec![
-                    NodeFactory::create_element("head".to_string(), vec![], vec![]),
-                    NodeFactory::create_element("body".to_string(), vec![], vec![]),
-                ]
-            )])
+            Node::new(
+                NodeType::Document(Document::new()),
+                vec![Node::new(
+                    NodeType::Element(Element::new(
+                        "html".to_string(),
+                        Attributes::from_iter(vec![])
+                    )),
+                    vec![
+                        Node::new(
+                            NodeType::Element(Element::new(
+                                "head".to_string(),
+                                Attributes::from_iter(vec![])
+                            )),
+                            vec![]
+                        ),
+                        Node::new(
+                            NodeType::Element(Element::new(
+                                "body".to_string(),
+                                Attributes::from_iter(vec![])
+                            )),
+                            vec![]
+                        ),
+                    ]
+                )]
+            )
         );
     }
 
@@ -42,25 +123,40 @@ mod tests {
 
         assert_eq!(
             dom,
-            NodeFactory::create_document(vec![NodeFactory::create_element(
-                "html".to_string(),
-                vec![],
-                vec![
-                    NodeFactory::create_element("head".to_string(), vec![], vec![]),
-                    NodeFactory::create_element(
-                        "body".to_string(),
-                        vec![],
-                        vec![NodeFactory::create_element(
-                            "h1".to_string(),
-                            vec![Attribute {
-                                name: "class".to_string(),
-                                value: "foo".to_string()
-                            }],
-                            vec![NodeFactory::create_text("Text ©".to_string())]
-                        )]
-                    ),
-                ]
-            )])
+            Node::new(
+                NodeType::Document(Document::new()),
+                vec![Node::new(
+                    NodeType::Element(Element::new(
+                        "html".to_string(),
+                        Attributes::from_iter(vec![])
+                    )),
+                    vec![
+                        Node::new(
+                            NodeType::Element(Element::new(
+                                "head".to_string(),
+                                Attributes::from_iter(vec![])
+                            )),
+                            vec![]
+                        ),
+                        Node::new(
+                            NodeType::Element(Element::new(
+                                "body".to_string(),
+                                Attributes::from_iter(vec![])
+                            )),
+                            vec![Node::new(
+                                NodeType::Element(Element::new(
+                                    "h1".to_string(),
+                                    Attributes::from_iter(vec![("class", "foo")])
+                                )),
+                                vec![Node::new(
+                                    NodeType::Text(Text::new("Text ©".to_string())),
+                                    vec![]
+                                )]
+                            )]
+                        )
+                    ]
+                )]
+            )
         );
     }
 
@@ -71,15 +167,35 @@ mod tests {
 
         assert_eq!(
             dom,
-            NodeFactory::create_document(vec![NodeFactory::create_element(
-                "html".to_string(),
-                vec![],
-                vec![
-                    NodeFactory::create_comment(" comment ".to_string()),
-                    NodeFactory::create_element("head".to_string(), vec![], vec![]),
-                    NodeFactory::create_element("body".to_string(), vec![], vec![]),
-                ]
-            )])
+            Node::new(
+                NodeType::Document(Document::new()),
+                vec![Node::new(
+                    NodeType::Element(Element::new(
+                        "html".to_string(),
+                        Attributes::from_iter(vec![])
+                    )),
+                    vec![
+                        Node::new(
+                            NodeType::Comment(Comment::new(" comment ".to_string())),
+                            vec![]
+                        ),
+                        Node::new(
+                            NodeType::Element(Element::new(
+                                "head".to_string(),
+                                Attributes::from_iter(vec![])
+                            )),
+                            vec![]
+                        ),
+                        Node::new(
+                            NodeType::Element(Element::new(
+                                "body".to_string(),
+                                Attributes::from_iter(vec![])
+                            )),
+                            vec![]
+                        ),
+                    ]
+                )]
+            )
         );
     }
 
@@ -90,46 +206,58 @@ mod tests {
 
         assert_eq!(
             dom,
-            NodeFactory::create_document(vec![NodeFactory::create_element(
-                "html".to_string(),
-                vec![Attribute {
-                    name: "lang".to_string(),
-                    value: "en".to_string()
-                }],
-                vec![
-                    NodeFactory::create_element(
-                        "head".to_string(),
-                        vec![],
-                        vec![
-                            NodeFactory::create_element(
-                                "meta".to_string(),
-                                vec![Attribute {
-                                    name: "charset".to_string(),
-                                    value: "UTF-8".to_string()
-                                }],
-                                vec![]
-                            ),
-                            NodeFactory::create_element(
-                                "title".to_string(),
-                                vec![],
-                                vec![NodeFactory::create_text("Document".to_string())]
-                            ),
-                        ]
-                    ),
-                    NodeFactory::create_element(
-                        "body".to_string(),
-                        vec![],
-                        vec![NodeFactory::create_element(
-                            "h1".to_string(),
-                            vec![Attribute {
-                                name: "class".to_string(),
-                                value: "foo".to_string()
-                            }],
-                            vec![NodeFactory::create_text("Text ©".to_string())]
-                        )]
-                    ),
-                ]
-            )])
+            Node::new(
+                NodeType::Document(Document::new()),
+                vec![Node::new(
+                    NodeType::Element(Element::new(
+                        "html".to_string(),
+                        Attributes::from_iter(vec![("lang", "en")])
+                    )),
+                    vec![
+                        Node::new(
+                            NodeType::Element(Element::new(
+                                "head".to_string(),
+                                Attributes::from_iter(vec![])
+                            ),),
+                            vec![
+                                Node::new(
+                                    NodeType::Element(Element::new(
+                                        "meta".to_string(),
+                                        Attributes::from_iter(vec![("charset", "UTF-8")])
+                                    )),
+                                    vec![]
+                                ),
+                                Node::new(
+                                    NodeType::Element(Element::new(
+                                        "title".to_string(),
+                                        Attributes::from_iter(vec![])
+                                    )),
+                                    vec![Node::new(
+                                        NodeType::Text(Text::new("Document".to_string())),
+                                        vec![]
+                                    )]
+                                ),
+                            ]
+                        ),
+                        Node::new(
+                            NodeType::Element(Element::new(
+                                "body".to_string(),
+                                Attributes::from_iter(vec![])
+                            )),
+                            vec![Node::new(
+                                NodeType::Element(Element::new(
+                                    "h1".to_string(),
+                                    Attributes::from_iter(vec![("class", "foo")])
+                                )),
+                                vec![Node::new(
+                                    NodeType::Text(Text::new("Text ©".to_string())),
+                                    vec![]
+                                )]
+                            )]
+                        ),
+                    ]
+                )]
+            )
         );
     }
 }

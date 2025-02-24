@@ -211,7 +211,7 @@ impl WordBuilder {
                 let font_size = styled_node.font_size().value();
                 let color = &styled_node.color().value();
                 let font_weight = styled_node.font_weight().value();
-                let text = &t.text;
+                let text = t.get();
 
                 let mut word = String::new();
 

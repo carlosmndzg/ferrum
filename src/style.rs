@@ -3,7 +3,7 @@ use types::{StyledNode, Styles};
 
 use crate::{
     css::types::{Declaration, Rule, Stylesheet},
-    Element, Node, NodeType,
+    Node, NodeType,
 };
 
 pub(crate) mod properties;
@@ -59,7 +59,7 @@ fn build_style_node<'a>(
 }
 
 fn is_tag_node(node: &Node, tag: &str) -> bool {
-    matches!(&node.node_type, NodeType::Element(Element { tag_name, .. }) if tag_name == tag)
+    matches!(&node.node_type, NodeType::Element(element) if tag == element.tag_name())
 }
 
 fn find_styles<'a>(
@@ -124,7 +124,7 @@ fn find_styles<'a>(
 
 fn find_style_attribute_declarations(node: &Node) -> Vec<Declaration> {
     if let NodeType::Element(element) = &node.node_type {
-        if let Some(style) = element.get_attribute("style") {
+        if let Some(style) = element.attributes().get("style") {
             let mut declarations = crate::css::parse_list_of_declarations(style);
 
             // We reverse it because we want to apply the last declaration first
@@ -158,9 +158,9 @@ fn sort_rules_by_specificity(rules: Vec<&Rule>) -> Vec<&Rule> {
 mod tests {
     use crate::{
         css::types::{Declaration, Selector, SimpleSelector, Value},
-        dom::Attribute,
+        dom::Attributes,
         style::{properties::color::Color, types::Rgb},
-        Text,
+        Element, Text,
     };
 
     use super::{properties::Property, *};
@@ -194,33 +194,19 @@ mod tests {
             ],
         };
 
-        let node = Node {
-            node_type: NodeType::Element(Element {
-                tag_name: "div".to_string(),
-                attributes: vec![],
-            }),
-            children: vec![Node {
-                node_type: NodeType::Element(Element {
-                    tag_name: "p".to_string(),
-                    attributes: vec![
-                        Attribute {
-                            name: "class".to_string(),
-                            value: "foo".to_string(),
-                        },
-                        Attribute {
-                            name: "id".to_string(),
-                            value: "bar".to_string(),
-                        },
-                    ],
-                }),
-                children: vec![Node {
-                    node_type: NodeType::Text(Text {
-                        text: "Hello, world!".to_string(),
-                    }),
-                    children: vec![],
-                }],
-            }],
-        };
+        let node = Node::new(
+            NodeType::Element(Element::new("div", Attributes::from_iter(vec![]))),
+            vec![Node::new(
+                NodeType::Element(Element::new(
+                    "p",
+                    Attributes::from_iter(vec![("class", "foo"), ("id", "bar")]),
+                )),
+                vec![Node::new(
+                    NodeType::Text(Text::new("Hello, world!".to_string())),
+                    vec![],
+                )],
+            )],
+        );
 
         let ua_stylesheet = Stylesheet { rules: vec![] };
 

@@ -163,11 +163,11 @@ impl Block<'_> {
             panic!("Node is not an element");
         };
 
-        if element.tag_name != "img" {
+        if element.tag_name() != "img" {
             panic!("Node is not an image");
         }
 
-        let Some(src) = element.get_attribute("src") else {
+        let Some(src) = element.attributes().get("src") else {
             return (0.0, 0.0);
         };
 

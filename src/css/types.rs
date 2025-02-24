@@ -132,10 +132,11 @@ impl Rule {
             return false;
         };
 
-        let tag_name = &element.tag_name;
-        let id = element.get_attribute("id");
+        let tag_name = element.tag_name();
+        let id = element.attributes().get("id").map(|s| s.as_str());
         let classes = element
-            .get_attribute("class")
+            .attributes()
+            .get("class")
             .map_or(vec![], |c| c.split(' ').map(String::from).collect());
 
         match &self.selector {

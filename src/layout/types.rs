@@ -245,7 +245,7 @@ impl BoxType<'_> {
                 let node_type = &node.node.node_type;
 
                 if let NodeType::Element(e) = node_type {
-                    return format!("Block | {}", e.tag_name);
+                    return format!("Block | {}", e.tag_name());
                 }
 
                 panic!("Node type not supported");
@@ -254,11 +254,11 @@ impl BoxType<'_> {
                 let node_type = &node.node.node_type;
 
                 if let NodeType::Element(e) = node_type {
-                    return format!("Inline element | {}", e.tag_name);
+                    return format!("Inline element | {}", e.tag_name());
                 }
 
                 if let NodeType::Text(t) = node_type {
-                    return format!("Inline text | {}", t.text);
+                    return format!("Inline text | {}", t.get());
                 }
 
                 panic!("Node type not supported");
