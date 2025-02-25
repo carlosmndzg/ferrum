@@ -7,6 +7,12 @@ pub(crate) struct Stylesheet {
     pub(crate) rules: Vec<Rule>,
 }
 
+impl Stylesheet {
+    pub(crate) fn matching_rules(&self, node: &Node) -> Vec<&Rule> {
+        self.rules.iter().filter(|r| r.matches_node(node)).collect()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub(crate) struct Rule {
     pub(crate) selector: Selector,

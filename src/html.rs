@@ -41,7 +41,7 @@ impl From<Children<'_, scraper::Node>> for Node {
 
 impl From<Attrs<'_>> for Attributes {
     fn from(attrs: Attrs) -> Self {
-        Attributes::from_iter(attrs)
+        attrs.collect()
     }
 }
 

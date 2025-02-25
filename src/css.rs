@@ -8,7 +8,7 @@ use crate::{Node, NodeType};
 pub(crate) mod parser;
 pub(crate) mod types;
 
-pub(crate) fn parse_dom(root: &Node, file_path: &Path) -> Stylesheet {
+pub(crate) fn parse_author(root: &Node, file_path: &Path) -> Stylesheet {
     let mut rules = Vec::new();
 
     parse_node(root, &mut rules, file_path);

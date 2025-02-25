@@ -2,6 +2,7 @@ use core::fmt;
 use std::collections::HashMap;
 
 use crate::{
+    css::types::Declaration,
     layout::{
         box_types::{block::Block, inline::Inline},
         formatting_context::FormattingContext,
@@ -18,7 +19,7 @@ use crate::{
     Node, NodeType,
 };
 
-use super::properties::display::Display;
+use super::properties::{display::Display, PropertyFactory};
 
 #[derive(PartialEq)]
 pub(crate) struct StyledNode<'a> {
@@ -43,9 +44,8 @@ macro_rules! generate_property_getter {
         pub(crate) fn $name(&self) -> &$property_type {
             let property_name = stringify!($name).replace('_', "-");
 
-            if let Some(Property::$property_type(value)) = self.styles.get_property(&property_name)
-            {
-                return &value;
+            if let Some(Property::$property_type(value)) = self.styles.get(&property_name) {
+                return value;
             }
 
             panic!(concat!(stringify!($property_type), " property not found"));
@@ -163,30 +163,28 @@ pub(crate) struct Styles {
 }
 
 impl Styles {
-    pub(crate) fn add_property(&mut self, property: Property) {
+    pub(crate) fn add(&mut self, property: Property) {
         let name = property.name().to_string();
-
-        if self.properties.contains_key(&name) {
-            return;
-        }
 
         self.properties.insert(name, property);
     }
 
-    pub(crate) fn get_property_clone(&self, name: &str) -> Option<Property> {
-        if !self.properties.contains_key(name) {
-            return None;
-        }
-
-        Some(self.properties.get(name).cloned().unwrap())
-    }
-
-    pub(crate) fn has_property(&self, name: &str) -> bool {
+    pub(crate) fn has(&self, name: &str) -> bool {
         self.properties.contains_key(name)
     }
 
-    pub(crate) fn get_property(&self, name: &str) -> Option<&Property> {
+    pub(crate) fn get(&self, name: &str) -> Option<&Property> {
         self.properties.get(name)
+    }
+
+    pub(crate) fn apply(&mut self, declarations: &[Declaration]) {
+        for declaration in declarations {
+            let property = PropertyFactory::create_property(declaration);
+
+            if let Some(property) = property {
+                self.add(property);
+            }
+        }
     }
 }
 

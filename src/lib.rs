@@ -31,7 +31,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.file_path)?;
     let dom = html::parse(&contents);
 
-    let author_stylesheet = css::parse_dom(&dom, config.file_path);
+    let author_stylesheet = css::parse_author(&dom, config.file_path);
     let user_agent_stylesheet = css::parse_ua(USER_AGENT_STYLESHEET);
 
     let style_tree = style::build_style_tree(&dom, &author_stylesheet, &user_agent_stylesheet);
