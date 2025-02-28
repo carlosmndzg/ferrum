@@ -1,13 +1,7 @@
 use core::{fmt, panic};
 use std::{mem, path::Path};
 
-use crate::{
-    style::{
-        properties::height::Height,
-        types::{Rgb, StyledNode},
-    },
-    NodeType,
-};
+use crate::{css::types::Rgb, style::types::StyledNode, NodeType};
 
 use super::{
     box_types::{
@@ -79,10 +73,10 @@ impl<'a> LayoutNode<'a> {
 
             if height.is_auto() {
                 None
-            } else if let (Height::Percentage(_), None) = (height, parent_desired_height) {
+            } else if height.is_percentage() && parent_desired_height.is_none() {
                 None
             } else {
-                Some(height.actual_value(parent_desired_height.unwrap_or(0.0)))
+                Some(height.value(parent_desired_height.unwrap_or(0.0)))
             }
         } else {
             None

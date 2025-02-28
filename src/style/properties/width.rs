@@ -1,52 +1,68 @@
-use crate::{css::types::Value, style::types::Unit};
+use crate::{css::types::Value, style::validations::Validations};
+
+use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum Width {
-    Auto,
-    Length(f32, Unit),
-    Percentage(f32),
+#[allow(dead_code)]
+pub(crate) struct Width {
+    value: Value,
 }
 
 impl Width {
-    pub(crate) fn maybe_new(value: &Value) -> Option<Width> {
-        if let Value::Keyword(keyword) = value {
-            if keyword.as_str() == "auto" {
-                return Some(Width::Auto);
-            }
+    pub(super) fn new() -> Self {
+        Width {
+            value: Value::default(),
         }
-
-        if let Value::Dimension(length, unit) = value {
-            if unit == "px" {
-                return Some(Width::Length(*length, Unit::Px));
-            }
-        }
-
-        if let Value::Percentage(percentage) = value {
-            return Some(Width::Percentage(*percentage));
-        }
-
-        None
-    }
-
-    pub(crate) fn name(&self) -> &str {
-        "width"
-    }
-
-    pub(crate) fn default() -> Width {
-        Width::Auto
     }
 
     pub(crate) fn is_auto(&self) -> bool {
-        matches!(self, Width::Auto)
+        matches!(&self.value, Value::Keyword(k) if k == "auto")
     }
 
-    pub(crate) fn actual_value(&self, parent_width: f32) -> f32 {
-        match self {
-            Width::Auto => 0.0,
-            Width::Length(length, unit) => match unit {
-                Unit::Px => *length,
-            },
-            Width::Percentage(percentage) => parent_width * percentage / 100.0,
+    pub(crate) fn value(&self, containing_block_width: f32) -> f32 {
+        match &self.value {
+            Value::Dimension(value, _) => *value,
+            Value::Percentage(value) => containing_block_width * value / 100.,
+            _ => 0.,
         }
+    }
+}
+
+impl CssProperty for Width {
+    fn name(&self) -> &'static str {
+        "width"
+    }
+
+    fn is_inheritable(&self) -> bool {
+        false
+    }
+
+    fn is_shorthand(&self) -> bool {
+        false
+    }
+
+    fn initial_value(&self) -> Vec<Property> {
+        vec![Property::Width(Width {
+            value: Value::Keyword("auto".to_string()),
+        })]
+    }
+
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property> {
+        if value.len() != 1 {
+            return Vec::new();
+        }
+
+        let value = value.first().unwrap();
+
+        if Validations::length(value)
+            || Validations::percentage(value)
+            || Validations::keyword(value, &["auto"])
+        {
+            return vec![Property::Width(Width {
+                value: value.clone(),
+            })];
+        }
+
+        Vec::new()
     }
 }

@@ -1,6 +1,6 @@
 use core::panic;
 
-use super::types::{Color, Declaration, Rule, Selector, SimpleSelector, Stylesheet, Value};
+use super::types::{Declaration, Rgb, Rule, Selector, SimpleSelector, Stylesheet, Unit, Value};
 
 pub(crate) struct CssParser {
     input: Vec<char>,
@@ -39,11 +39,7 @@ impl CssParser {
             panic!("Invalid color values");
         }
 
-        Value::Color(Color {
-            r: r as u8,
-            g: g as u8,
-            b: b as u8,
-        })
+        Value::Rgb(Rgb::new(r as u8, g as u8, b as u8, 1.))
     }
 
     fn consume_if_starts(&mut self, s: &str) -> bool {
@@ -176,7 +172,11 @@ impl CssParser {
                 }
                 _ => {
                     let unit = self.consume_identifier();
-                    Value::Dimension(number as f32, unit)
+
+                    match unit.as_str() {
+                        "px" => Value::Dimension(number as f32, Unit::Px),
+                        _ => Value::Dimension(number as f32, Unit::None),
+                    }
                 }
             }
         } else {
@@ -310,7 +310,7 @@ mod tests {
                             },
                             Declaration {
                                 name: "margin-left".to_string(),
-                                value: Value::Dimension(4.0, "px".to_string()),
+                                value: Value::Dimension(4.0, Unit::Px),
                             }
                         ],
                     },
@@ -327,7 +327,7 @@ mod tests {
                             },
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::Color(Color { r: 0, g: 0, b: 255 }),
+                                value: Value::Rgb(Rgb::new(0, 0, 255, 1.)),
                             },
                         ],
                     },
@@ -344,7 +344,7 @@ mod tests {
                             },
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::Color(Color { r: 0, g: 0, b: 255 }),
+                                value: Value::Rgb(Rgb::new(0, 0, 255, 1.)),
                             },
                         ],
                     },
@@ -361,7 +361,7 @@ mod tests {
                             },
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::Color(Color { r: 0, g: 0, b: 255 }),
+                                value: Value::Rgb(Rgb::new(0, 0, 255, 1.)),
                             },
                         ],
                     },

@@ -1,31 +1,57 @@
-use crate::css::types::Value;
+use crate::{css::types::Value, style::validations::Validations};
+
+use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum Display {
-    Block,
-    Inline,
-    None,
+#[allow(dead_code)]
+pub(crate) struct Display {
+    value: Value,
 }
 
 impl Display {
-    pub(crate) fn maybe_new(value: &Value) -> Option<Display> {
-        if let Value::Keyword(keyword) = value {
-            match keyword.as_str() {
-                "block" => return Some(Display::Block),
-                "inline" => return Some(Display::Inline),
-                "none" => return Some(Display::None),
-                _ => {}
-            }
+    pub(super) fn new() -> Self {
+        Display {
+            value: Value::default(),
         }
-
-        None
     }
 
-    pub(crate) fn name(&self) -> &str {
+    pub(crate) fn value(&self) -> &Value {
+        &self.value
+    }
+}
+
+impl CssProperty for Display {
+    fn name(&self) -> &'static str {
         "display"
     }
 
-    pub(crate) fn default() -> Display {
-        Display::Inline
+    fn is_inheritable(&self) -> bool {
+        false
+    }
+
+    fn is_shorthand(&self) -> bool {
+        false
+    }
+
+    fn initial_value(&self) -> Vec<Property> {
+        vec![Property::Display(Display {
+            value: Value::Keyword("inline".to_string()),
+        })]
+    }
+
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property> {
+        if value.len() != 1 {
+            return Vec::new();
+        }
+
+        let value = value.first().unwrap();
+
+        if Validations::keyword(value, &["inline", "block", "none"]) {
+            return vec![Property::Display(Display {
+                value: value.clone(),
+            })];
+        }
+
+        Vec::new()
     }
 }

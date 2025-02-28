@@ -7,10 +7,7 @@ use font_kit::{
     source::SystemSource,
 };
 
-use crate::{
-    style::{properties::text_align::TextAlign, types::Rgb},
-    NodeType,
-};
+use crate::{css::types::Rgb, style::properties::text_align::TextAlign, NodeType};
 
 use super::{
     box_types::{block::Block, inline::Inline, word::Word as WordBox},
@@ -209,7 +206,7 @@ impl WordBuilder {
             } else if let NodeType::Text(t) = node_type {
                 let line_height = styled_node.line_height().value();
                 let font_size = styled_node.font_size().value();
-                let color = &styled_node.color().value();
+                let color = styled_node.color().value();
                 let font_weight = styled_node.font_weight().value();
                 let text = t.get();
 

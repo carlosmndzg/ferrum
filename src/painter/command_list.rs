@@ -60,12 +60,12 @@ impl CommandList {
         )
         | BoxType::Inline(Inline { node: styled_node }) = node.box_type
         {
-            let color = &styled_node.color().value();
-            let border_color = styled_node.border_color().actual_value(color);
+            let color = styled_node.color().value();
+            let border_color = styled_node.border_color().value(&color);
             let border_box = node.box_dimensions.border_box();
             let border_width = styled_node
                 .border_width()
-                .actual_value(&styled_node.border_style().value());
+                .value(&styled_node.border_style().value());
 
             self.commands.push(Box::new(DrawBorder::new(
                 border_box.x,

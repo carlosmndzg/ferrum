@@ -1,49 +1,34 @@
 use crate::{
     css::types::Value,
     layout::types::{BoxType, LayoutNode},
+    style::validations::Validations,
 };
 
+use super::{CssProperty, Property};
+
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum TextAlign {
-    Left,
-    Right,
-    Center,
-    Justify,
+#[allow(dead_code)]
+pub(crate) struct TextAlign {
+    value: Value,
 }
 
 impl TextAlign {
-    pub(crate) fn maybe_new(value: &Value) -> Option<TextAlign> {
-        if let Value::Keyword(keyword) = value {
-            match keyword.as_str() {
-                "left" => return Some(TextAlign::Left),
-                "right" => return Some(TextAlign::Right),
-                "center" => return Some(TextAlign::Center),
-                "justify" => return Some(TextAlign::Justify),
-                _ => {}
-            }
+    pub(super) fn new() -> Self {
+        TextAlign {
+            value: Value::default(),
         }
-
-        None
-    }
-
-    pub(crate) fn name(&self) -> &str {
-        "text-align"
-    }
-
-    pub(crate) fn default() -> TextAlign {
-        TextAlign::Left
-    }
-
-    pub(crate) fn value(&self) -> TextAlign {
-        self.clone()
     }
 
     pub(crate) fn apply(&self, node: &mut LayoutNode) {
-        match self {
-            TextAlign::Left => {}
-            TextAlign::Center => self.apply_text_align_center(node),
-            TextAlign::Right => self.apply_text_align_right(node),
-            TextAlign::Justify => self.apply_text_align_justify(node),
+        let Value::Keyword(keyword) = &self.value else {
+            return;
+        };
+
+        match keyword.as_str() {
+            "center" => self.apply_text_align_center(node),
+            "right" => self.apply_text_align_right(node),
+            "justify" => self.apply_text_align_justify(node),
+            _ => {}
         }
     }
 
@@ -112,5 +97,41 @@ impl TextAlign {
         }
 
         count
+    }
+}
+
+impl CssProperty for TextAlign {
+    fn name(&self) -> &'static str {
+        "text-align"
+    }
+
+    fn is_inheritable(&self) -> bool {
+        true
+    }
+
+    fn is_shorthand(&self) -> bool {
+        false
+    }
+
+    fn initial_value(&self) -> Vec<Property> {
+        vec![Property::TextAlign(TextAlign {
+            value: Value::Keyword("left".to_string()),
+        })]
+    }
+
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property> {
+        if value.len() != 1 {
+            return Vec::new();
+        }
+
+        let value = value.first().unwrap();
+
+        if Validations::keyword(value, &["left", "center", "right", "justify"]) {
+            return vec![Property::TextAlign(TextAlign {
+                value: value.clone(),
+            })];
+        }
+
+        Vec::new()
     }
 }

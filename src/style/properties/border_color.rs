@@ -1,40 +1,65 @@
-use crate::{css::types::Value, style::types::Rgb};
+use crate::{
+    css::types::{Rgb, Value},
+    style::{utils::keyword_to_rgb, validations::Validations},
+};
+
+use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum BorderColor {
-    Declaration { value: Rgb },
-    NotDeclared,
+#[allow(dead_code)]
+pub(crate) struct BorderColor {
+    value: Value,
 }
 
 impl BorderColor {
-    pub(crate) fn maybe_new(value: &Value) -> Option<BorderColor> {
-        if let Value::Keyword(keyword) = value {
-            if let Some(color) = Rgb::convert_keyword_to_rgb(keyword) {
-                return Some(BorderColor::Declaration { value: color });
-            }
+    pub(super) fn new() -> Self {
+        BorderColor {
+            value: Value::default(),
         }
-
-        if let Value::Color(color) = value {
-            if let Some(color) = color.into() {
-                return Some(BorderColor::Declaration { value: color });
-            }
-        }
-
-        None
     }
 
-    pub(crate) fn name(&self) -> &str {
+    pub(crate) fn value(&self, color: &Rgb) -> Rgb {
+        match &self.value {
+            Value::Rgb(rgb) => rgb.clone(),
+            Value::Keyword(keyword) => keyword_to_rgb(keyword),
+            Value::NotDeclared => color.clone(),
+            _ => panic!("Unexpected value for border-color"),
+        }
+    }
+}
+
+impl CssProperty for BorderColor {
+    fn name(&self) -> &'static str {
         "border-color"
     }
 
-    pub(crate) fn default() -> BorderColor {
-        BorderColor::NotDeclared
+    fn is_inheritable(&self) -> bool {
+        false
     }
 
-    pub(crate) fn actual_value<'a>(&'a self, value_color_property: &'a Rgb) -> &'a Rgb {
-        match self {
-            BorderColor::Declaration { value } => value,
-            BorderColor::NotDeclared => value_color_property,
+    fn is_shorthand(&self) -> bool {
+        false
+    }
+
+    fn initial_value(&self) -> Vec<Property> {
+        vec![Property::BorderColor(BorderColor {
+            value: Value::NotDeclared,
+        })]
+    }
+
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property> {
+        if value.len() != 1 {
+            return Vec::new();
         }
+
+        let value = value.first().unwrap();
+
+        if Validations::color(value) {
+            return vec![Property::BorderColor(BorderColor {
+                value: value.clone(),
+            })];
+        }
+
+        Vec::new()
     }
 }

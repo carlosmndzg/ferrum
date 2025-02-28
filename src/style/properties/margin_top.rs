@@ -1,48 +1,64 @@
-use crate::{css::types::Value, style::types::Unit};
+use crate::{
+    css::types::{Unit, Value},
+    style::validations::Validations,
+};
+
+use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum MarginTop {
-    Auto,
-    Length(f32, Unit),
-    Percentage(f32),
+#[allow(dead_code)]
+pub(crate) struct MarginTop {
+    value: Value,
 }
 
 impl MarginTop {
-    pub(crate) fn maybe_new(value: &Value) -> Option<MarginTop> {
-        if let Value::Keyword(keyword) = value {
-            if keyword.as_str() == "auto" {
-                return Some(MarginTop::Auto);
-            }
+    pub(crate) fn new() -> Self {
+        MarginTop {
+            value: Value::default(),
         }
-
-        if let Value::Dimension(length, unit) = value {
-            if unit == "px" {
-                return Some(MarginTop::Length(*length, Unit::Px));
-            }
-        }
-
-        if let Value::Percentage(percentage) = value {
-            return Some(MarginTop::Percentage(*percentage));
-        }
-
-        None
     }
 
-    pub(crate) fn name(&self) -> &str {
+    pub(crate) fn value(&self, containing_block_height: f32) -> f32 {
+        match &self.value {
+            Value::Dimension(value, _) => *value,
+            Value::Percentage(value) => containing_block_height * value / 100.,
+            _ => 0.,
+        }
+    }
+}
+
+impl CssProperty for MarginTop {
+    fn name(&self) -> &'static str {
         "margin-top"
     }
 
-    pub(crate) fn default() -> MarginTop {
-        MarginTop::Length(0.0, Unit::Px)
+    fn is_inheritable(&self) -> bool {
+        false
     }
 
-    pub(crate) fn actual_value(&self, parent_width: f32) -> f32 {
-        match self {
-            MarginTop::Auto => 0.0,
-            MarginTop::Length(length, unit) => match unit {
-                Unit::Px => *length,
-            },
-            MarginTop::Percentage(percentage) => parent_width * percentage / 100.0,
+    fn is_shorthand(&self) -> bool {
+        false
+    }
+
+    fn initial_value(&self) -> Vec<Property> {
+        vec![Property::MarginTop(MarginTop {
+            value: Value::Dimension(0., Unit::Px),
+        })]
+    }
+
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property> {
+        if value.len() != 1 {
+            return Vec::new();
         }
+
+        let value = value.first().unwrap();
+
+        if Validations::wide_keyword(value) || Validations::margin_width(value) {
+            return vec![Property::MarginTop(MarginTop {
+                value: value.clone(),
+            })];
+        }
+
+        Vec::new()
     }
 }

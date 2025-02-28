@@ -1,31 +1,63 @@
-use crate::{css::types::Value, style::types::Unit};
+use crate::{
+    css::types::{Unit, Value},
+    style::validations::Validations,
+};
+
+use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum FontSize {
-    Length(f32, Unit),
+#[allow(dead_code)]
+pub(crate) struct FontSize {
+    value: Value,
 }
 
 impl FontSize {
-    pub(crate) fn maybe_new(value: &Value) -> Option<FontSize> {
-        if let Value::Dimension(length, unit) = value {
-            if unit == "px" {
-                return Some(FontSize::Length(*length, Unit::Px));
-            }
+    pub(super) fn new() -> Self {
+        FontSize {
+            value: Value::default(),
         }
-        None
-    }
-
-    pub(crate) fn name(&self) -> &str {
-        "font-size"
-    }
-
-    pub(crate) fn default() -> FontSize {
-        FontSize::Length(16.0, Unit::Px)
     }
 
     pub(crate) fn value(&self) -> f32 {
-        match self {
-            FontSize::Length(value, _) => *value,
+        match &self.value {
+            Value::Dimension(value, Unit::Px) => *value,
+            _ => panic!("Invalid font-size value"),
         }
+    }
+}
+
+impl CssProperty for FontSize {
+    fn name(&self) -> &'static str {
+        "font-size"
+    }
+
+    fn is_inheritable(&self) -> bool {
+        true
+    }
+
+    fn is_shorthand(&self) -> bool {
+        false
+    }
+
+    fn initial_value(&self) -> Vec<Property> {
+        vec![Property::FontSize(FontSize {
+            value: Value::Dimension(16., Unit::Px),
+        })]
+    }
+
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property> {
+        if value.len() != 1 {
+            return Vec::new();
+        }
+
+        let value = value.first().unwrap();
+
+        if Validations::length(value) {
+            return vec![Property::FontSize(FontSize {
+                value: value.clone(),
+            })];
+        }
+
+        Vec::new()
     }
 }

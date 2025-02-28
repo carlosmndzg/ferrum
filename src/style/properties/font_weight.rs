@@ -1,42 +1,68 @@
-use crate::css::types::Value;
+use crate::{
+    css::types::{Unit, Value},
+    style::validations::Validations,
+};
+
+use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum FontWeight {
-    UnitLess(u32),
+#[allow(dead_code)]
+pub(crate) struct FontWeight {
+    value: Value,
 }
 
 impl FontWeight {
-    pub(crate) fn maybe_new(value: &Value) -> Option<FontWeight> {
-        if let Value::Dimension(length, unit) = value {
-            if unit.is_empty() && *length >= 1. && *length <= 1000. {
-                return Some(FontWeight::UnitLess((*length).round() as u32));
-            }
+    pub(super) fn new() -> Self {
+        FontWeight {
+            value: Value::default(),
         }
-
-        if let Value::Keyword(keyword) = value {
-            if keyword == "normal" {
-                return Some(FontWeight::UnitLess(400));
-            }
-
-            if keyword == "bold" {
-                return Some(FontWeight::UnitLess(700));
-            }
-        }
-
-        None
-    }
-
-    pub(crate) fn name(&self) -> &str {
-        "font-weight"
-    }
-
-    pub(crate) fn default() -> FontWeight {
-        FontWeight::UnitLess(400)
     }
 
     pub(crate) fn value(&self) -> u32 {
-        match self {
-            FontWeight::UnitLess(value) => *value,
+        match &self.value {
+            Value::Dimension(value, Unit::None) => *value as u32,
+            Value::Keyword(keyword) => match keyword.as_str() {
+                "normal" => 400,
+                "bold" => 700,
+                _ => panic!("Invalid font-weight value"),
+            },
+            _ => panic!("Invalid font-weight value"),
         }
+    }
+}
+
+impl CssProperty for FontWeight {
+    fn name(&self) -> &'static str {
+        "font-weight"
+    }
+
+    fn is_inheritable(&self) -> bool {
+        true
+    }
+
+    fn is_shorthand(&self) -> bool {
+        false
+    }
+
+    fn initial_value(&self) -> Vec<Property> {
+        vec![Property::FontWeight(FontWeight {
+            value: Value::Dimension(400., Unit::None),
+        })]
+    }
+
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property> {
+        if value.len() != 1 {
+            return Vec::new();
+        }
+
+        let value = value.first().unwrap();
+
+        if Validations::font_weight(value) {
+            return vec![Property::FontWeight(FontWeight {
+                value: value.clone(),
+            })];
+        }
+
+        Vec::new()
     }
 }

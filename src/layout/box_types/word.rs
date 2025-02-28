@@ -1,4 +1,4 @@
-use crate::style::types::Rgb;
+use crate::css::types::Rgb;
 
 #[derive(Debug, PartialEq)]
 pub(crate) struct Word {

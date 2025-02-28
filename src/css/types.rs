@@ -37,19 +37,37 @@ pub(crate) struct Declaration {
     pub(crate) value: Value,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub(crate) enum Value {
-    Keyword(String),
-    Color(Color),
-    Dimension(f32, String),
+    Rgb(Rgb),
+    Dimension(f32, Unit),
     Percentage(f32),
+    Keyword(String),
+    NotDeclared,
+    #[default]
+    Temporal,
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub(crate) struct Color {
+#[derive(Default, Debug, Clone, PartialEq)]
+#[allow(dead_code)]
+pub(crate) struct Rgb {
     pub(crate) r: u8,
     pub(crate) g: u8,
     pub(crate) b: u8,
+    pub(crate) a: f32,
+}
+
+impl Rgb {
+    pub(crate) const fn new(r: u8, g: u8, b: u8, a: f32) -> Self {
+        Rgb { r, g, b, a }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[allow(dead_code)]
+pub(crate) enum Unit {
+    Px,
+    None,
 }
 
 #[derive(Debug, PartialEq)]

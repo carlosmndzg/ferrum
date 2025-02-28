@@ -1,38 +1,64 @@
-use crate::{css::types::Value, style::types::Rgb};
+use crate::{
+    css::types::{Rgb, Value},
+    style::{utils::keyword_to_rgb, validations::Validations},
+};
+
+use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
+#[allow(dead_code)]
 pub(crate) struct Color {
-    pub(crate) value: Rgb,
+    value: Value,
 }
 
 impl Color {
-    pub(crate) fn maybe_new(value: &Value) -> Option<Color> {
-        if let Value::Keyword(keyword) = value {
-            if let Some(color) = Rgb::convert_keyword_to_rgb(keyword) {
-                return Some(Color { value: color });
-            }
-        }
-
-        if let Value::Color(color) = value {
-            if let Some(color) = color.into() {
-                return Some(Color { value: color });
-            }
-        }
-
-        None
-    }
-
-    pub(crate) fn name(&self) -> &str {
-        "color"
-    }
-
-    pub(crate) fn default() -> Color {
+    pub(super) fn new() -> Self {
         Color {
-            value: Rgb::wrap_color(0, 0, 0, 1.0).unwrap(),
+            value: Value::default(),
         }
     }
 
     pub(crate) fn value(&self) -> Rgb {
-        self.value.clone()
+        match &self.value {
+            Value::Rgb(rgb) => rgb.clone(),
+            Value::Keyword(keyword) => keyword_to_rgb(keyword),
+            _ => panic!("Invalid color value"),
+        }
+    }
+}
+
+impl CssProperty for Color {
+    fn name(&self) -> &'static str {
+        "color"
+    }
+
+    fn is_inheritable(&self) -> bool {
+        true
+    }
+
+    fn is_shorthand(&self) -> bool {
+        false
+    }
+
+    fn initial_value(&self) -> Vec<Property> {
+        vec![Property::Color(Color {
+            value: Value::Rgb(Rgb::new(0, 0, 0, 1.)),
+        })]
+    }
+
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property> {
+        if value.len() != 1 {
+            return Vec::new();
+        }
+
+        let value = value.first().unwrap();
+
+        if Validations::wide_keyword(value) || Validations::color(value) {
+            return vec![Property::Color(Color {
+                value: value.clone(),
+            })];
+        }
+
+        Vec::new()
     }
 }

@@ -1,40 +1,64 @@
-use crate::{css::types::Value, style::types::Unit};
+use crate::{
+    css::types::{Unit, Value},
+    style::validations::Validations,
+};
+
+use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum PaddingRight {
-    Length(f32, Unit),
-    Percentage(f32),
+#[allow(dead_code)]
+pub(crate) struct PaddingRight {
+    value: Value,
 }
 
 impl PaddingRight {
-    pub(crate) fn maybe_new(value: &Value) -> Option<PaddingRight> {
-        if let Value::Dimension(length, unit) = value {
-            if unit == "px" {
-                return Some(PaddingRight::Length(*length, Unit::Px));
-            }
+    pub(crate) fn new() -> Self {
+        PaddingRight {
+            value: Value::default(),
         }
-
-        if let Value::Percentage(percentage) = value {
-            return Some(PaddingRight::Percentage(*percentage));
-        }
-
-        None
     }
 
-    pub(crate) fn name(&self) -> &str {
+    pub(crate) fn value(&self, containing_block_width: f32) -> f32 {
+        match &self.value {
+            Value::Dimension(value, Unit::Px) => *value,
+            Value::Percentage(value) => containing_block_width * value / 100.,
+            _ => panic!("Invalid padding-right value"),
+        }
+    }
+}
+
+impl CssProperty for PaddingRight {
+    fn name(&self) -> &'static str {
         "padding-right"
     }
 
-    pub(crate) fn default() -> PaddingRight {
-        PaddingRight::Length(0.0, Unit::Px)
+    fn is_inheritable(&self) -> bool {
+        false
     }
 
-    pub(crate) fn actual_value(&self, parent_width: f32) -> f32 {
-        match self {
-            PaddingRight::Length(length, unit) => match unit {
-                Unit::Px => *length,
-            },
-            PaddingRight::Percentage(percentage) => parent_width * percentage / 100.0,
+    fn is_shorthand(&self) -> bool {
+        false
+    }
+
+    fn initial_value(&self) -> Vec<Property> {
+        vec![Property::PaddingRight(PaddingRight {
+            value: Value::Dimension(0., Unit::Px),
+        })]
+    }
+
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property> {
+        if value.len() != 1 {
+            return Vec::new();
         }
+
+        let value = value.first().unwrap();
+
+        if Validations::padding_width(value) {
+            return vec![Property::PaddingRight(PaddingRight {
+                value: value.clone(),
+            })];
+        }
+
+        Vec::new()
     }
 }

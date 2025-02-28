@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use background_color::BackgroundColor;
 use border_color::BorderColor;
 use border_style::BorderStyle;
@@ -19,37 +21,7 @@ use padding_top::PaddingTop;
 use text_align::TextAlign;
 use width::Width;
 
-use crate::css::types::Declaration;
-
-pub(crate) const AVAILABLE_PROPERTIES: [&str; 20] = [
-    "color",
-    "display",
-    "width",
-    "height",
-    "font-size",
-    "background-color",
-    "padding-top",
-    "padding-right",
-    "padding-bottom",
-    "padding-left",
-    "margin-top",
-    "margin-right",
-    "margin-bottom",
-    "margin-left",
-    "line-height",
-    "font-weight",
-    "text-align",
-    "border-width",
-    "border-color",
-    "border-style",
-];
-pub(crate) const INHERITABLE_PROPERTIES: [&str; 5] = [
-    "color",
-    "font-size",
-    "line-height",
-    "font-weight",
-    "text-align",
-];
+use crate::css::types::Value;
 
 pub(crate) mod background_color;
 pub(crate) mod border_color;
@@ -72,171 +44,188 @@ pub(crate) mod padding_top;
 pub(crate) mod text_align;
 pub(crate) mod width;
 
-pub(crate) struct PropertyFactory;
-
-impl PropertyFactory {
-    pub(crate) fn create_property(declaration: &Declaration) -> Option<Property> {
-        match declaration.name.as_str() {
-            "color" => Some(Property::Color(Color::maybe_new(&declaration.value)?)),
-            "display" => Some(Property::Display(Display::maybe_new(&declaration.value)?)),
-            "width" => Some(Property::Width(Width::maybe_new(&declaration.value)?)),
-            "height" => Some(Property::Height(Height::maybe_new(&declaration.value)?)),
-            "font-size" => Some(Property::FontSize(FontSize::maybe_new(&declaration.value)?)),
-            "background-color" => Some(Property::BackgroundColor(BackgroundColor::maybe_new(
-                &declaration.value,
-            )?)),
-            "margin-top" => Some(Property::MarginTop(MarginTop::maybe_new(
-                &declaration.value,
-            )?)),
-            "margin-right" => Some(Property::MarginRight(MarginRight::maybe_new(
-                &declaration.value,
-            )?)),
-            "margin-bottom" => Some(Property::MarginBottom(MarginBottom::maybe_new(
-                &declaration.value,
-            )?)),
-            "margin-left" => Some(Property::MarginLeft(MarginLeft::maybe_new(
-                &declaration.value,
-            )?)),
-            "padding-top" => Some(Property::PaddingTop(PaddingTop::maybe_new(
-                &declaration.value,
-            )?)),
-            "padding-right" => Some(Property::PaddingRight(PaddingRight::maybe_new(
-                &declaration.value,
-            )?)),
-            "padding-bottom" => Some(Property::PaddingBottom(PaddingBottom::maybe_new(
-                &declaration.value,
-            )?)),
-            "padding-left" => Some(Property::PaddingLeft(PaddingLeft::maybe_new(
-                &declaration.value,
-            )?)),
-            "line-height" => Some(Property::LineHeight(LineHeight::maybe_new(
-                &declaration.value,
-            )?)),
-            "font-weight" => Some(Property::FontWeight(FontWeight::maybe_new(
-                &declaration.value,
-            )?)),
-            "text-align" => Some(Property::TextAlign(TextAlign::maybe_new(
-                &declaration.value,
-            )?)),
-            "border-width" => Some(Property::BorderWidth(BorderWidth::maybe_new(
-                &declaration.value,
-            )?)),
-            "border-color" => Some(Property::BorderColor(BorderColor::maybe_new(
-                &declaration.value,
-            )?)),
-            "border-style" => Some(Property::BorderStyle(BorderStyle::maybe_new(
-                &declaration.value,
-            )?)),
-            _ => None,
-        }
-    }
-
-    pub(crate) fn create_initial_property(name: &str) -> Property {
-        match name {
-            "color" => Property::Color(Color::default()),
-            "display" => Property::Display(Display::default()),
-            "width" => Property::Width(Width::default()),
-            "height" => Property::Height(Height::default()),
-            "font-size" => Property::FontSize(FontSize::default()),
-            "background-color" => Property::BackgroundColor(BackgroundColor::default()),
-            "padding-top" => Property::PaddingTop(PaddingTop::default()),
-            "padding-right" => Property::PaddingRight(PaddingRight::default()),
-            "padding-bottom" => Property::PaddingBottom(PaddingBottom::default()),
-            "padding-left" => Property::PaddingLeft(PaddingLeft::default()),
-            "margin-top" => Property::MarginTop(MarginTop::default()),
-            "margin-right" => Property::MarginRight(MarginRight::default()),
-            "margin-bottom" => Property::MarginBottom(MarginBottom::default()),
-            "margin-left" => Property::MarginLeft(MarginLeft::default()),
-            "line-height" => Property::LineHeight(LineHeight::default()),
-            "font-weight" => Property::FontWeight(FontWeight::default()),
-            "text-align" => Property::TextAlign(TextAlign::default()),
-            "border-width" => Property::BorderWidth(BorderWidth::default()),
-            "border-color" => Property::BorderColor(BorderColor::default()),
-            "border-style" => Property::BorderStyle(BorderStyle::default()),
-            _ => panic!("Unknown property \"{}\"", name),
-        }
-    }
-}
-
+#[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum Property {
+    BackgroundColor(BackgroundColor),
+    BorderColor(BorderColor),
+    BorderStyle(BorderStyle),
+    BorderWidth(BorderWidth),
     Color(Color),
     Display(Display),
-    Width(Width),
-    Height(Height),
     FontSize(FontSize),
-    BackgroundColor(BackgroundColor),
-    PaddingTop(PaddingTop),
-    PaddingRight(PaddingRight),
-    PaddingBottom(PaddingBottom),
-    PaddingLeft(PaddingLeft),
+    FontWeight(FontWeight),
+    Height(Height),
+    LineHeight(LineHeight),
     MarginTop(MarginTop),
     MarginRight(MarginRight),
     MarginBottom(MarginBottom),
     MarginLeft(MarginLeft),
-    LineHeight(LineHeight),
-    FontWeight(FontWeight),
+    PaddingTop(PaddingTop),
+    PaddingRight(PaddingRight),
+    PaddingBottom(PaddingBottom),
+    PaddingLeft(PaddingLeft),
     TextAlign(TextAlign),
-    BorderWidth(BorderWidth),
-    BorderColor(BorderColor),
-    BorderStyle(BorderStyle),
+    Width(Width),
 }
 
 impl Property {
     pub(crate) fn name(&self) -> &str {
         match self {
-            Property::Color(color) => color.name(),
-            Property::Display(display) => display.name(),
-            Property::Width(width) => width.name(),
-            Property::Height(height) => height.name(),
-            Property::FontSize(font_size) => font_size.name(),
-            Property::BackgroundColor(background_color) => background_color.name(),
-            Property::PaddingTop(padding_top) => padding_top.name(),
-            Property::PaddingRight(padding_right) => padding_right.name(),
-            Property::PaddingBottom(padding_bottom) => padding_bottom.name(),
-            Property::PaddingLeft(padding_left) => padding_left.name(),
-            Property::MarginTop(margin_top) => margin_top.name(),
-            Property::MarginRight(margin_right) => margin_right.name(),
-            Property::MarginBottom(margin_bottom) => margin_bottom.name(),
-            Property::MarginLeft(margin_left) => margin_left.name(),
-            Property::LineHeight(line_height) => line_height.name(),
-            Property::FontWeight(font_weight) => font_weight.name(),
-            Property::TextAlign(text_align) => text_align.name(),
-            Property::BorderWidth(border_width) => border_width.name(),
-            Property::BorderColor(border_color) => border_color.name(),
-            Property::BorderStyle(border_style) => border_style.name(),
+            Property::BackgroundColor(property) => property.name(),
+            Property::BorderColor(property) => property.name(),
+            Property::BorderStyle(property) => property.name(),
+            Property::BorderWidth(property) => property.name(),
+            Property::Color(property) => property.name(),
+            Property::Display(property) => property.name(),
+            Property::FontSize(property) => property.name(),
+            Property::FontWeight(property) => property.name(),
+            Property::Height(property) => property.name(),
+            Property::LineHeight(property) => property.name(),
+            Property::MarginTop(property) => property.name(),
+            Property::MarginRight(property) => property.name(),
+            Property::MarginBottom(property) => property.name(),
+            Property::MarginLeft(property) => property.name(),
+            Property::PaddingTop(property) => property.name(),
+            Property::PaddingRight(property) => property.name(),
+            Property::PaddingBottom(property) => property.name(),
+            Property::PaddingLeft(property) => property.name(),
+            Property::TextAlign(property) => property.name(),
+            Property::Width(property) => property.name(),
         }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::{css::types::Value, style::types::Rgb};
+/// A registry for CSS properties.
+/// This struct is responsible for managing the properties that can be used in CSS
+pub(crate) struct PropertyRegistry {
+    properties: HashMap<&'static str, Box<dyn CssProperty>>,
+    inheritable_properties: Vec<&'static str>,
+    available_properties: Vec<&'static str>,
+}
 
-    use super::*;
-
-    #[test]
-    fn test_create_property() {
-        let declaration = Declaration {
-            name: "color".to_string(),
-            value: Value::Keyword("red".to_string()),
+impl PropertyRegistry {
+    /// Creates a new `PropertyRegistry` instance with the default properties registered.
+    pub(crate) fn new() -> Self {
+        let mut property_builder = PropertyRegistry {
+            properties: HashMap::new(),
+            inheritable_properties: Vec::new(),
+            available_properties: Vec::new(),
         };
 
-        let property = PropertyFactory::create_property(&declaration);
+        property_builder.register(Box::new(BackgroundColor::new()));
+        property_builder.register(Box::new(BorderStyle::new()));
+        property_builder.register(Box::new(BorderWidth::new()));
+        property_builder.register(Box::new(BorderColor::new()));
+        property_builder.register(Box::new(Color::new()));
+        property_builder.register(Box::new(Display::new()));
+        property_builder.register(Box::new(FontSize::new()));
+        property_builder.register(Box::new(FontWeight::new()));
+        property_builder.register(Box::new(Height::new()));
+        property_builder.register(Box::new(LineHeight::new()));
+        property_builder.register(Box::new(MarginTop::new()));
+        property_builder.register(Box::new(MarginRight::new()));
+        property_builder.register(Box::new(MarginBottom::new()));
+        property_builder.register(Box::new(MarginLeft::new()));
+        property_builder.register(Box::new(PaddingTop::new()));
+        property_builder.register(Box::new(PaddingRight::new()));
+        property_builder.register(Box::new(PaddingBottom::new()));
+        property_builder.register(Box::new(PaddingLeft::new()));
+        property_builder.register(Box::new(TextAlign::new()));
+        property_builder.register(Box::new(Width::new()));
+
+        property_builder
+    }
+
+    fn register(&mut self, property: Box<dyn CssProperty>) {
+        if property.is_inheritable() {
+            self.inheritable_properties.push(property.name());
+        }
+
+        if !property.is_shorthand() {
+            self.available_properties.push(property.name());
+        }
+
+        self.properties.insert(property.name(), property);
+    }
+
+    /// Creates properties based on the provided name and values.
+    /// Due to the nature of CSS, a property can set multiple properties (shorthand properties).
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - A string slice representing the name of the CSS property.
+    /// * `value` - A slice of `Value` instances representing the CSS property values.
+    ///
+    /// # Returns
+    ///
+    /// A vector of `Property` instances based on the provided name and values.
+    pub(crate) fn create(&self, name: &str, value: &[Value]) -> impl IntoIterator<Item = Property> {
+        let property = self.properties.get(name);
 
         if let Some(property) = property {
-            let Property::Color(Color {
-                value: Rgb { r, g, b, .. },
-            }) = property
-            else {
-                panic!("Expected a property to be created");
-            };
-
-            assert_eq!(r, 255);
-            assert_eq!(g, 0);
-            assert_eq!(b, 0);
-        } else {
-            panic!("Expected a property to be created");
+            return property.maybe_new(value);
         }
+
+        Vec::new()
     }
+
+    /// Returns the initial value of the CSS property based on the provided name.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - A string slice representing the name of the CSS property.
+    ///
+    /// # Returns
+    ///
+    /// An owned iterator of `Property` instances representing the initial value of the CSS property.
+    pub(crate) fn initial_value(&self, name: &str) -> impl IntoIterator<Item = Property> {
+        let property = self.properties.get(name);
+
+        if let Some(property) = property {
+            return property.initial_value();
+        }
+
+        Vec::new()
+    }
+
+    /// Returns the list of inheritable properties.
+    pub(crate) fn inheritable_properties(&self) -> &[&'static str] {
+        &self.inheritable_properties
+    }
+
+    /// Returns the list of available properties (shorthand properties not included).
+    pub(crate) fn available_properties(&self) -> &[&'static str] {
+        &self.available_properties
+    }
+}
+
+/// A trait representing a CSS property.
+trait CssProperty {
+    /// Returns the name of the CSS property.
+    fn name(&self) -> &'static str;
+
+    /// Returns whether the CSS property is inheritable or not.
+    fn is_inheritable(&self) -> bool;
+
+    /// Returns the initial value of the CSS property, if any (short hand properties do not provide initial value).
+    fn initial_value(&self) -> Vec<Property>;
+
+    /// Returns whether the CSS property is a shorthand property or not.
+    fn is_shorthand(&self) -> bool;
+
+    /// Attempts to create a new `Property` from the given slice of `Value`s.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - A slice of `Value` instances representing the CSS property values.
+    ///
+    /// # Returns
+    ///
+    /// * `Some(Property)` if the values can be successfully converted into a `Property`.
+    /// * `None` if the values cannot be converted into a `Property`.
+    ///
+    /// This method allows for the creation of a `Property` based on the provided values,
+    /// returning `None` if the conversion is not possible.
+    fn maybe_new(&self, value: &[Value]) -> Vec<Property>;
 }

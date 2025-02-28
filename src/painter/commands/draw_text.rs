@@ -1,6 +1,6 @@
 use raqote::{DrawOptions, DrawTarget, Point, SolidSource, Source};
 
-use crate::{painter::fonts_context::FontsContext, style::types::Rgb};
+use crate::{css::types::Rgb, painter::fonts_context::FontsContext};
 
 use super::Command;
 

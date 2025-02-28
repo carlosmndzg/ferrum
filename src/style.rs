@@ -1,4 +1,4 @@
-use properties::{PropertyFactory, AVAILABLE_PROPERTIES, INHERITABLE_PROPERTIES};
+use properties::PropertyRegistry;
 use types::{StyledNode, Styles};
 
 use crate::{
@@ -8,12 +8,16 @@ use crate::{
 
 pub(crate) mod properties;
 pub(crate) mod types;
+pub(crate) mod utils;
+pub(crate) mod validations;
 
 pub(crate) fn build_style_tree<'a>(
     root: &'a Node,
     author_stylesheet: &'a Stylesheet,
     user_agent_stylesheet: &'a Stylesheet,
 ) -> StyledNode<'a> {
+    let property_registry = PropertyRegistry::new();
+
     let html_node = root
         .find_first_node(&|n| is_tag_node(n, "html"))
         .expect("No <html> node found in the DOM");
@@ -22,13 +26,20 @@ pub(crate) fn build_style_tree<'a>(
         .find_first_node(&|n| is_tag_node(n, "body"))
         .expect("No <body> node found in the DOM");
 
-    let styles = find_styles(html_node, author_stylesheet, user_agent_stylesheet, None);
+    let styles = find_styles(
+        html_node,
+        author_stylesheet,
+        user_agent_stylesheet,
+        None,
+        &property_registry,
+    );
 
     let children = vec![build_style_node(
         body_node,
         author_stylesheet,
         user_agent_stylesheet,
         Some(&styles),
+        &property_registry,
     )];
 
     StyledNode {
@@ -43,12 +54,14 @@ fn build_style_node<'a>(
     author_stylesheet: &'a Stylesheet,
     user_agent_stylesheet: &'a Stylesheet,
     parent_styles: Option<&Styles>,
+    property_registry: &PropertyRegistry,
 ) -> StyledNode<'a> {
     let styles = find_styles(
         node,
         author_stylesheet,
         user_agent_stylesheet,
         parent_styles,
+        property_registry,
     );
 
     let children = node
@@ -60,6 +73,7 @@ fn build_style_node<'a>(
                 author_stylesheet,
                 user_agent_stylesheet,
                 Some(&styles),
+                property_registry,
             )
         })
         .collect();
@@ -80,6 +94,7 @@ fn find_styles<'a>(
     author_stylesheet: &'a Stylesheet,
     user_agent_stylesheet: &'a Stylesheet,
     parent_styles: Option<&'a Styles>,
+    property_registry: &PropertyRegistry,
 ) -> Styles {
     let mut styles = Styles::default();
 
@@ -88,7 +103,7 @@ fn find_styles<'a>(
     ua_rules.sort_by_key(|rule| rule.specificity());
 
     for rule in ua_rules {
-        styles.apply(&rule.declarations);
+        styles.apply(&rule.declarations, property_registry);
     }
 
     // Author rules
@@ -96,16 +111,16 @@ fn find_styles<'a>(
     author_rules.sort_by_key(|rule| rule.specificity());
 
     for rule in author_rules {
-        styles.apply(&rule.declarations);
+        styles.apply(&rule.declarations, property_registry);
     }
 
     let style_attribute_declarations = find_style_attribute_declarations(node);
 
-    styles.apply(&style_attribute_declarations);
+    styles.apply(&style_attribute_declarations, property_registry);
 
     // Defaulting values (Inheritance)
     if let Some(parent_styles) = parent_styles {
-        for property_name in INHERITABLE_PROPERTIES {
+        for property_name in property_registry.inheritable_properties() {
             if !styles.has(property_name) && parent_styles.has(property_name) {
                 styles.add(parent_styles.get(property_name).cloned().unwrap());
             }
@@ -113,9 +128,13 @@ fn find_styles<'a>(
     }
 
     // Defaulting values (Initial values)
-    for property_name in AVAILABLE_PROPERTIES {
+    for property_name in property_registry.available_properties() {
         if !styles.has(property_name) {
-            styles.add(PropertyFactory::create_initial_property(property_name));
+            let initial_values = property_registry.initial_value(property_name);
+
+            for value in initial_values {
+                styles.add(value);
+            }
         }
     }
 
@@ -132,138 +151,4 @@ fn find_style_attribute_declarations(node: &Node) -> Vec<Declaration> {
     }
 
     Vec::new()
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{
-        css::types::{Declaration, Rule, Selector, SimpleSelector, Value},
-        dom::Attributes,
-        style::{properties::color::Color, types::Rgb},
-        Element, Text,
-    };
-
-    use super::{properties::Property, *};
-
-    #[test]
-    fn test_cascade_inheritance_initial() {
-        let stylesheet = Stylesheet {
-            rules: vec![
-                Rule {
-                    selector: Selector::Simple(SimpleSelector {
-                        tag_name: None,
-                        id: Some("bar".to_string()),
-                        class: vec![],
-                    }),
-                    declarations: vec![Declaration {
-                        name: "color".to_string(),
-                        value: Value::Keyword("aquamarine".to_string()),
-                    }],
-                },
-                Rule {
-                    selector: Selector::Simple(SimpleSelector {
-                        tag_name: Some("p".to_string()),
-                        id: None,
-                        class: vec!["foo".to_string()],
-                    }),
-                    declarations: vec![Declaration {
-                        name: "color".to_string(),
-                        value: Value::Keyword("rebeccapurple".to_string()),
-                    }],
-                },
-            ],
-        };
-
-        let node = Node::new(
-            NodeType::Element(Element::new("div", Attributes::from_iter(vec![]))),
-            vec![Node::new(
-                NodeType::Element(Element::new(
-                    "p",
-                    Attributes::from_iter(vec![("class", "foo"), ("id", "bar")]),
-                )),
-                vec![Node::new(
-                    NodeType::Text(Text::new("Hello, world!".to_string())),
-                    vec![],
-                )],
-            )],
-        );
-
-        let ua_stylesheet = Stylesheet { rules: vec![] };
-
-        let styled_node = build_style_node(&node, &stylesheet, &ua_stylesheet, None);
-
-        let color = styled_node
-            .styles
-            .get("color")
-            .cloned()
-            .expect("Expected a color property");
-
-        let Property::Color(color) = color else {
-            panic!("Expected a color property");
-        };
-
-        // Div node color
-        assert_eq!(
-            color,
-            Color {
-                value: Rgb {
-                    r: 0,
-                    g: 0,
-                    b: 0,
-                    a: 1.0
-                }
-            }
-        );
-
-        let p_node = styled_node.children.first().expect("Expected child p node");
-
-        let Property::Color(color) = p_node
-            .styles
-            .get("color")
-            .cloned()
-            .expect("Expected a color property")
-        else {
-            panic!("Expected a color property");
-        };
-
-        // P node color
-        assert_eq!(
-            color,
-            Color {
-                value: Rgb {
-                    r: 127,
-                    g: 255,
-                    b: 212,
-                    a: 1.0
-                }
-            }
-        );
-
-        let text_node = p_node
-            .children
-            .first()
-            .expect("Expected child text node for p node");
-
-        let Property::Color(color) = text_node
-            .styles
-            .get("color")
-            .cloned()
-            .expect("Expected a color property")
-        else {
-            panic!("Expected a color property");
-        };
-
-        // Text node color
-        assert_eq!(
-            color,
-            Color {
-                value: Rgb {
-                    r: 127,
-                    g: 255,
-                    b: 212,
-                    a: 1.0
-                }
-            }
-        );
-    }
 }

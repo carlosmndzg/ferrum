@@ -48,7 +48,7 @@ impl Anonymous {
             .expect("Anonymous box must have a child");
 
         match &child.box_type {
-            BoxType::Inline(Inline { node }) => node.text_align().value(),
+            BoxType::Inline(Inline { node }) => node.text_align().clone(),
             _ => panic!("Anonymous box must have an inline child"),
         }
     }
