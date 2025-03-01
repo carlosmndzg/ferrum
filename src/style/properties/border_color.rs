@@ -18,7 +18,7 @@ impl BorderColor {
         }
     }
 
-    pub(crate) fn value(&self, color: &Rgb) -> Rgb {
+    pub(crate) fn actual_value(&self, color: &Rgb) -> Rgb {
         match &self.value {
             Value::Rgb(rgb) => rgb.clone(),
             Value::Keyword(keyword) => keyword_to_rgb(keyword),

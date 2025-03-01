@@ -18,7 +18,7 @@ impl LineHeight {
         }
     }
 
-    pub(crate) fn value(&self) -> f32 {
+    pub(crate) fn actual_value(&self) -> f32 {
         match &self.value {
             Value::Dimension(value, Unit::None) => *value,
             _ => panic!("Invalid line-height value"),

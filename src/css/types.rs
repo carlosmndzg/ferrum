@@ -34,7 +34,7 @@ pub(crate) struct SimpleSelector {
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Declaration {
     pub(crate) name: String,
-    pub(crate) value: Value,
+    pub(crate) value: Vec<Value>,
 }
 
 #[derive(Debug, PartialEq, Clone, Default)]

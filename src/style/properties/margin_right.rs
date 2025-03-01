@@ -22,7 +22,7 @@ impl MarginRight {
         matches!(&self.value, Value::Keyword(k) if k == "auto")
     }
 
-    pub(crate) fn value(&self, containing_block_width: f32) -> f32 {
+    pub(crate) fn actual_value(&self, containing_block_width: f32) -> f32 {
         match &self.value {
             Value::Dimension(value, _) => *value,
             Value::Percentage(value) => containing_block_width * value / 100.,

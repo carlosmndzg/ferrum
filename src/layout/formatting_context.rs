@@ -204,10 +204,10 @@ impl WordBuilder {
                     node.children,
                 ));
             } else if let NodeType::Text(t) = node_type {
-                let line_height = styled_node.line_height().value();
-                let font_size = styled_node.font_size().value();
-                let color = styled_node.color().value();
-                let font_weight = styled_node.font_weight().value();
+                let line_height = styled_node.line_height().actual_value();
+                let font_size = styled_node.font_size().actual_value();
+                let color = styled_node.color().actual_value();
+                let font_weight = styled_node.font_weight().actual_value();
                 let text = t.get();
 
                 let mut word = String::new();

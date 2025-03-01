@@ -185,7 +185,7 @@ impl Styles {
             let property_name = &declaration.name;
             let property_value = &declaration.value;
 
-            for property in property_registry.create(&property_name, &[property_value.clone()]) {
+            for property in property_registry.create(property_name, property_value) {
                 self.add(property);
             }
         }

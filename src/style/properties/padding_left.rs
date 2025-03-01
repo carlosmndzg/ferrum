@@ -18,11 +18,11 @@ impl PaddingLeft {
         }
     }
 
-    pub(crate) fn value(&self, containing_block_width: f32) -> f32 {
+    pub(crate) fn actual_value(&self, containing_block_width: f32) -> f32 {
         match &self.value {
             Value::Dimension(value, Unit::Px) => *value,
             Value::Percentage(value) => containing_block_width * value / 100.,
-            _ => panic!("Invalid padding-left value"),
+            _ => 0.,
         }
     }
 }

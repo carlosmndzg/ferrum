@@ -10,10 +10,12 @@ use font_size::FontSize;
 use font_weight::FontWeight;
 use height::Height;
 use line_height::LineHeight;
+use margin::Margin;
 use margin_bottom::MarginBottom;
 use margin_left::MarginLeft;
 use margin_right::MarginRight;
 use margin_top::MarginTop;
+use padding::Padding;
 use padding_bottom::PaddingBottom;
 use padding_left::PaddingLeft;
 use padding_right::PaddingRight;
@@ -33,10 +35,12 @@ pub(crate) mod font_size;
 pub(crate) mod font_weight;
 pub(crate) mod height;
 pub(crate) mod line_height;
+pub(crate) mod margin;
 pub(crate) mod margin_bottom;
 pub(crate) mod margin_left;
 pub(crate) mod margin_right;
 pub(crate) mod margin_top;
+pub(crate) mod padding;
 pub(crate) mod padding_bottom;
 pub(crate) mod padding_left;
 pub(crate) mod padding_right;
@@ -57,10 +61,12 @@ pub(crate) enum Property {
     FontWeight(FontWeight),
     Height(Height),
     LineHeight(LineHeight),
+    Margin(Margin),
     MarginTop(MarginTop),
     MarginRight(MarginRight),
     MarginBottom(MarginBottom),
     MarginLeft(MarginLeft),
+    Padding(Padding),
     PaddingTop(PaddingTop),
     PaddingRight(PaddingRight),
     PaddingBottom(PaddingBottom),
@@ -82,10 +88,12 @@ impl Property {
             Property::FontWeight(property) => property.name(),
             Property::Height(property) => property.name(),
             Property::LineHeight(property) => property.name(),
+            Property::Margin(property) => property.name(),
             Property::MarginTop(property) => property.name(),
             Property::MarginRight(property) => property.name(),
             Property::MarginBottom(property) => property.name(),
             Property::MarginLeft(property) => property.name(),
+            Property::Padding(property) => property.name(),
             Property::PaddingTop(property) => property.name(),
             Property::PaddingRight(property) => property.name(),
             Property::PaddingBottom(property) => property.name(),
@@ -123,10 +131,12 @@ impl PropertyRegistry {
         property_builder.register(Box::new(FontWeight::new()));
         property_builder.register(Box::new(Height::new()));
         property_builder.register(Box::new(LineHeight::new()));
+        property_builder.register(Box::new(Margin::new()));
         property_builder.register(Box::new(MarginTop::new()));
         property_builder.register(Box::new(MarginRight::new()));
         property_builder.register(Box::new(MarginBottom::new()));
         property_builder.register(Box::new(MarginLeft::new()));
+        property_builder.register(Box::new(Padding::new()));
         property_builder.register(Box::new(PaddingTop::new()));
         property_builder.register(Box::new(PaddingRight::new()));
         property_builder.register(Box::new(PaddingBottom::new()));

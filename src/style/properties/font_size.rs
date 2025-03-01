@@ -18,7 +18,7 @@ impl FontSize {
         }
     }
 
-    pub(crate) fn value(&self) -> f32 {
+    pub(crate) fn actual_value(&self) -> f32 {
         match &self.value {
             Value::Dimension(value, Unit::Px) => *value,
             _ => panic!("Invalid font-size value"),

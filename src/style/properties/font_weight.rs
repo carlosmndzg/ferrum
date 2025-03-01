@@ -18,7 +18,7 @@ impl FontWeight {
         }
     }
 
-    pub(crate) fn value(&self) -> u32 {
+    pub(crate) fn actual_value(&self) -> u32 {
         match &self.value {
             Value::Dimension(value, Unit::None) => *value as u32,
             Value::Keyword(keyword) => match keyword.as_str() {

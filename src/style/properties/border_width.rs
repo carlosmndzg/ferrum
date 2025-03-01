@@ -15,7 +15,7 @@ impl BorderWidth {
         }
     }
 
-    pub(crate) fn value(&self, border_style: &Value) -> f32 {
+    pub(crate) fn actual_value(&self, border_style: &Value) -> f32 {
         if matches!(border_style, Value::Keyword(value) if value == "none" || value == "hidden") {
             return 0.;
         }

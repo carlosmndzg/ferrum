@@ -18,7 +18,7 @@ impl Height {
         }
     }
 
-    pub(crate) fn value(&self, parent_height: f32) -> f32 {
+    pub(crate) fn actual_value(&self, parent_height: f32) -> f32 {
         match &self.value {
             Value::Keyword(k) if k == "auto" => 0.0,
             Value::Percentage(p) => (p / 100.0) * parent_height,

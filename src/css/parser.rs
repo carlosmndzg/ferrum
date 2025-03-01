@@ -152,39 +152,56 @@ impl CssParser {
             .unwrap()
     }
 
-    fn consume_value(&mut self) -> Value {
-        if self.consume_if_starts("rgb(") {
-            let r = self.consume_number();
-            self.consume_next_code_point();
-            let g = self.consume_number();
-            self.consume_next_code_point();
-            let b = self.consume_number();
-            self.consume_next_code_point();
+    fn consume_values(&mut self) -> Option<Vec<Value>> {
+        let mut ans = Vec::new();
 
-            self.create_color_from_i32(r, g, b)
-        } else if matches!(self.next_code_point(), Some(c) if c.is_ascii_digit()) {
-            let number = self.consume_number();
+        loop {
+            if self.consume_if_starts("rgb(") {
+                let r = self.consume_number();
+                self.consume_next_code_point();
+                let g = self.consume_number();
+                self.consume_next_code_point();
+                let b = self.consume_number();
+                self.consume_next_code_point();
 
-            match self.next_code_point() {
-                Some('%') => {
-                    self.consume_next_code_point();
-                    Value::Percentage(number as f32)
-                }
-                _ => {
-                    let unit = self.consume_identifier();
+                ans.push(self.create_color_from_i32(r, g, b));
+            } else if matches!(self.next_code_point(), Some(c) if c.is_ascii_digit()) {
+                let number = self.consume_number();
 
-                    match unit.as_str() {
-                        "px" => Value::Dimension(number as f32, Unit::Px),
-                        _ => Value::Dimension(number as f32, Unit::None),
+                match self.next_code_point() {
+                    Some('%') => {
+                        self.consume_next_code_point();
+                        ans.push(Value::Percentage(number as f32));
+                    }
+                    _ => {
+                        let unit = self.consume_identifier();
+
+                        match unit.as_str() {
+                            "px" => ans.push(Value::Dimension(number as f32, Unit::Px)),
+                            "" => ans.push(Value::Dimension(number as f32, Unit::None)),
+                            _ => return None,
+                        }
                     }
                 }
+            } else {
+                ans.push(Value::Keyword(
+                    self.consume_until_and_return(|c| !c.is_alphabetic()),
+                ))
             }
-        } else {
-            Value::Keyword(self.consume_until_and_return(|c| !c.is_alphabetic()))
+
+            self.consume_until(|c| !c.is_whitespace());
+
+            let next_code_point = self.next_code_point();
+
+            if next_code_point == Some(';') || next_code_point.is_none() {
+                break;
+            }
         }
+
+        Some(ans)
     }
 
-    fn consume_declaration(&mut self) -> Declaration {
+    fn consume_declaration(&mut self) -> Option<Declaration> {
         self.consume_until(|c| !c.is_whitespace());
 
         let name = self.consume_identifier();
@@ -197,7 +214,7 @@ impl CssParser {
 
         self.consume_until(|c| !c.is_whitespace());
 
-        let value = self.consume_value();
+        let value = self.consume_values();
 
         self.consume_until(|c| !c.is_whitespace());
 
@@ -205,7 +222,11 @@ impl CssParser {
             panic!("Expected ';'");
         }
 
-        Declaration { name, value }
+        if let Some(value) = value {
+            return Some(Declaration { name, value });
+        }
+
+        None
     }
 
     fn consume_declarations(&mut self) -> Vec<Declaration> {
@@ -221,7 +242,10 @@ impl CssParser {
             }
 
             self.reconsume_current_code_point();
-            declarations.push(self.consume_declaration());
+
+            if let Some(declaration) = self.consume_declaration() {
+                declarations.push(declaration);
+            }
         }
 
         declarations
@@ -302,15 +326,15 @@ mod tests {
                         declarations: vec![
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::Keyword("red".to_string()),
+                                value: vec![Value::Keyword("red".to_string())],
                             },
                             Declaration {
                                 name: "width".to_string(),
-                                value: Value::Percentage(100.0),
+                                value: vec![Value::Percentage(100.0)],
                             },
                             Declaration {
                                 name: "margin-left".to_string(),
-                                value: Value::Dimension(4.0, Unit::Px),
+                                value: vec![Value::Dimension(4.0, Unit::Px)],
                             }
                         ],
                     },
@@ -323,11 +347,11 @@ mod tests {
                         declarations: vec![
                             Declaration {
                                 name: "display".to_string(),
-                                value: Value::Keyword("block".to_string()),
+                                value: vec![Value::Keyword("block".to_string())],
                             },
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::Rgb(Rgb::new(0, 0, 255, 1.)),
+                                value: vec![Value::Rgb(Rgb::new(0, 0, 255, 1.))],
                             },
                         ],
                     },
@@ -340,11 +364,11 @@ mod tests {
                         declarations: vec![
                             Declaration {
                                 name: "display".to_string(),
-                                value: Value::Keyword("block".to_string()),
+                                value: vec![Value::Keyword("block".to_string())],
                             },
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::Rgb(Rgb::new(0, 0, 255, 1.)),
+                                value: vec![Value::Rgb(Rgb::new(0, 0, 255, 1.))],
                             },
                         ],
                     },
@@ -357,11 +381,11 @@ mod tests {
                         declarations: vec![
                             Declaration {
                                 name: "display".to_string(),
-                                value: Value::Keyword("block".to_string()),
+                                value: vec![Value::Keyword("block".to_string())],
                             },
                             Declaration {
                                 name: "color".to_string(),
-                                value: Value::Rgb(Rgb::new(0, 0, 255, 1.)),
+                                value: vec![Value::Rgb(Rgb::new(0, 0, 255, 1.))],
                             },
                         ],
                     },

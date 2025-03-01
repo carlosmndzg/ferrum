@@ -18,7 +18,7 @@ impl MarginTop {
         }
     }
 
-    pub(crate) fn value(&self, containing_block_height: f32) -> f32 {
+    pub(crate) fn actual_value(&self, containing_block_height: f32) -> f32 {
         match &self.value {
             Value::Dimension(value, _) => *value,
             Value::Percentage(value) => containing_block_height * value / 100.,

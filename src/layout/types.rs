@@ -71,12 +71,10 @@ impl<'a> LayoutNode<'a> {
         if let BoxType::Block(Block { node, .. }, ..) = &self.box_type {
             let height = node.height();
 
-            if height.is_auto() {
-                None
-            } else if height.is_percentage() && parent_desired_height.is_none() {
+            if height.is_auto() || (height.is_percentage() && parent_desired_height.is_none()) {
                 None
             } else {
-                Some(height.value(parent_desired_height.unwrap_or(0.0)))
+                Some(height.actual_value(parent_desired_height.unwrap_or(0.0)))
             }
         } else {
             None

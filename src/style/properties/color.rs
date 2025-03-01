@@ -18,7 +18,7 @@ impl Color {
         }
     }
 
-    pub(crate) fn value(&self) -> Rgb {
+    pub(crate) fn actual_value(&self) -> Rgb {
         match &self.value {
             Value::Rgb(rgb) => rgb.clone(),
             Value::Keyword(keyword) => keyword_to_rgb(keyword),

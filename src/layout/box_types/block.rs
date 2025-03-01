@@ -44,28 +44,31 @@ impl Block<'_> {
         let padding_left = self
             .node
             .padding_left()
-            .value(containing_block.content.width);
+            .actual_value(containing_block.content.width);
         let padding_right = self
             .node
             .padding_right()
-            .value(containing_block.content.width);
+            .actual_value(containing_block.content.width);
         let border_left = self
             .node
             .border_width()
-            .value(self.node.border_style().value());
+            .actual_value(self.node.border_style().value());
         let border_right = self
             .node
             .border_width()
-            .value(self.node.border_style().value());
-        let mut width = self.node.width().value(containing_block.content.width);
+            .actual_value(self.node.border_style().value());
+        let mut width = self
+            .node
+            .width()
+            .actual_value(containing_block.content.width);
         let mut margin_left = self
             .node
             .margin_left()
-            .value(containing_block.content.width);
+            .actual_value(containing_block.content.width);
         let mut margin_right = self
             .node
             .margin_right()
-            .value(containing_block.content.width);
+            .actual_value(containing_block.content.width);
 
         if self.node.is_replaced_element() {
             is_width_auto = false;
@@ -137,7 +140,10 @@ impl Block<'_> {
     ) -> f32 {
         let is_width_auto = self.node.width().is_auto();
         let is_height_auto = self.node.height().is_auto();
-        let declared_width = self.node.width().value(containing_block.content.width);
+        let declared_width = self
+            .node
+            .width()
+            .actual_value(containing_block.content.width);
 
         let (intrinsic_width, intrinsic_height) =
             self.intrinsic_image_dimensions(self.node, file_path);
@@ -182,27 +188,30 @@ impl Block<'_> {
     }
 
     fn compute_position(&self, node: &mut LayoutNode, containing_block: &BoxDimensions) {
-        let margin_top = self.node.margin_top().value(containing_block.content.width);
+        let margin_top = self
+            .node
+            .margin_top()
+            .actual_value(containing_block.content.width);
         let margin_bottom = self
             .node
             .margin_bottom()
-            .value(containing_block.content.width);
+            .actual_value(containing_block.content.width);
         let padding_top = self
             .node
             .padding_top()
-            .value(containing_block.content.width);
+            .actual_value(containing_block.content.width);
         let padding_bottom = self
             .node
             .padding_bottom()
-            .value(containing_block.content.width);
+            .actual_value(containing_block.content.width);
         let border_top = self
             .node
             .border_width()
-            .value(self.node.border_style().value());
+            .actual_value(self.node.border_style().value());
         let border_bottom = self
             .node
             .border_width()
-            .value(self.node.border_style().value());
+            .actual_value(self.node.border_style().value());
 
         node.box_dimensions.margin.top = margin_top;
         node.box_dimensions.margin.bottom = margin_bottom;
