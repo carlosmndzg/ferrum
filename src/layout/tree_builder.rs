@@ -5,12 +5,12 @@ use crate::style::types::StyledNode;
 use super::types::{BoxDimensions, EdgeSizes, LayoutNode, Rectangle};
 
 pub(crate) struct LayoutTreeBuilder<'a> {
-    dimensions: (f32, f32),
+    dimensions: (usize, usize),
     file_path: &'a Path,
 }
 
 impl LayoutTreeBuilder<'_> {
-    pub fn new(dimensions: (f32, f32), file_path: &Path) -> LayoutTreeBuilder {
+    pub fn new(dimensions: (usize, usize), file_path: &Path) -> LayoutTreeBuilder {
         LayoutTreeBuilder {
             dimensions,
             file_path,
@@ -22,16 +22,17 @@ impl LayoutTreeBuilder<'_> {
 
         icb.children.push(root.into());
 
-        icb.box_dimensions.content.width = self.dimensions.0;
+        icb.box_dimensions.content.width = self.dimensions.0 as f32;
 
         let containing_block = &icb.box_dimensions;
         let child = icb.children.get_mut(0).unwrap();
-        let child_desired_height = child.compute_desired_height(Option::Some(self.dimensions.1));
+        let child_desired_height =
+            child.compute_desired_height(Option::Some(self.dimensions.1 as f32));
 
         child.compute_layout(containing_block, child_desired_height, self.file_path);
 
-        icb.box_dimensions.content.height = self.dimensions.1;
-        child.box_dimensions.content.height = self.dimensions.1;
+        icb.box_dimensions.content.height = self.dimensions.1 as f32;
+        child.box_dimensions.content.height = self.dimensions.1 as f32;
 
         icb
     }

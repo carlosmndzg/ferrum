@@ -21,7 +21,7 @@ pub(crate) mod formatting_context;
 pub fn build_layout_tree<'a>(
     style_tree: &'a StyledNode,
     file_path: &Path,
-    dimensions: (f32, f32),
+    dimensions: (usize, usize),
 ) -> LayoutNode<'a> {
     let mut layout_tree_builder = LayoutTreeBuilder::new(dimensions, file_path);
 
