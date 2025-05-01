@@ -13,8 +13,8 @@ pub(crate) mod validations;
 
 pub(crate) fn build_style_tree<'a>(
     root: &'a Node,
-    author_stylesheet: &'a Stylesheet,
-    user_agent_stylesheet: &'a Stylesheet,
+    author_stylesheet: &Stylesheet,
+    user_agent_stylesheet: &Stylesheet,
 ) -> StyledNode<'a> {
     let property_registry = PropertyRegistry::new();
 
@@ -51,8 +51,8 @@ pub(crate) fn build_style_tree<'a>(
 
 fn build_style_node<'a>(
     node: &'a Node,
-    author_stylesheet: &'a Stylesheet,
-    user_agent_stylesheet: &'a Stylesheet,
+    author_stylesheet: &Stylesheet,
+    user_agent_stylesheet: &Stylesheet,
     parent_styles: Option<&Styles>,
     property_registry: &PropertyRegistry,
 ) -> StyledNode<'a> {
@@ -89,11 +89,11 @@ fn is_tag_node(node: &Node, tag: &str) -> bool {
     matches!(&node.node_type, NodeType::Element(element) if tag == element.tag_name())
 }
 
-fn find_styles<'a>(
-    node: &'a Node,
-    author_stylesheet: &'a Stylesheet,
-    user_agent_stylesheet: &'a Stylesheet,
-    parent_styles: Option<&'a Styles>,
+fn find_styles(
+    node: &Node,
+    author_stylesheet: &Stylesheet,
+    user_agent_stylesheet: &Stylesheet,
+    parent_styles: Option<&Styles>,
     property_registry: &PropertyRegistry,
 ) -> Styles {
     let mut styles = Styles::default();

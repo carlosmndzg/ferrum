@@ -30,7 +30,6 @@ impl Window {
 
     pub(crate) fn run(&mut self, root: &StyledNode, file_path: &Path) {
         let mut size = self.window.get_size();
-
         let mut dt = self.render(root, size, file_path);
 
         while self.window.is_open() && !self.window.is_key_down(minifb::Key::Escape) {
@@ -57,7 +56,7 @@ impl Window {
 
         self.clear_canvas(&mut dt);
 
-        for command in &commands.commands {
+        for command in &commands {
             command.execute(&mut dt, reference);
         }
 

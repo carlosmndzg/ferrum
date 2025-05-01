@@ -156,6 +156,10 @@ impl CssParser {
         let mut ans = Vec::new();
 
         loop {
+            if self.next_code_point() == Some(':') {
+                panic!("Unexpected ':'");
+            }
+
             if self.consume_if_starts("rgb(") {
                 let r = self.consume_number();
                 self.consume_next_code_point();
@@ -193,7 +197,7 @@ impl CssParser {
 
             let next_code_point = self.next_code_point();
 
-            if next_code_point == Some(';') || next_code_point.is_none() {
+            if matches!(next_code_point, Some(';') | Some('}') | None) {
                 break;
             }
         }
@@ -218,7 +222,7 @@ impl CssParser {
 
         self.consume_until(|c| !c.is_whitespace());
 
-        if !matches!(self.consume_next_code_point(), Some(';') | None) {
+        if !matches!(self.consume_next_code_point(), Some(';') | Some('}') | None) {
             panic!("Expected ';'");
         }
 

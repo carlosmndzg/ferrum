@@ -17,7 +17,16 @@ use super::{
 };
 
 pub(crate) struct CommandList {
-    pub(crate) commands: Vec<Box<dyn Command>>,
+    commands: Vec<Box<dyn Command>>,
+}
+
+impl<'a> IntoIterator for &'a CommandList {
+    type Item = &'a Box<dyn Command>;
+    type IntoIter = std::slice::Iter<'a, Box<dyn Command>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.commands.iter()
+    }
 }
 
 impl CommandList {

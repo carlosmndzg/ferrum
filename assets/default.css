@@ -5,10 +5,7 @@ html {
 
 body {
     display: block;
-    margin-top: 8px;
-    margin-right: 8px;
-    margin-bottom: 8px;
-    margin-left: 8px;
+    margin: 8px;
 }
 
 p, div, article, aside, footer, header, hgroup, main, nav, search, section {
@@ -51,8 +48,5 @@ h6 {
 
 p {
     display: block;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    margin-left: 0px;
-    margin-right: 0px;
+    margin: 8px 0;
 }
