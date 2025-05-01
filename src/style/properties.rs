@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use background_color::BackgroundColor;
+use border::Border;
 use border_color::BorderColor;
 use border_style::BorderStyle;
 use border_width::BorderWidth;
@@ -26,6 +27,7 @@ use width::Width;
 use crate::css::types::Value;
 
 pub(crate) mod background_color;
+pub(crate) mod border;
 pub(crate) mod border_color;
 pub(crate) mod border_style;
 pub(crate) mod border_width;
@@ -52,6 +54,7 @@ pub(crate) mod width;
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum Property {
     BackgroundColor(BackgroundColor),
+    Border(Border),
     BorderColor(BorderColor),
     BorderStyle(BorderStyle),
     BorderWidth(BorderWidth),
@@ -79,6 +82,7 @@ impl Property {
     pub(crate) fn name(&self) -> &str {
         match self {
             Property::BackgroundColor(property) => property.name(),
+            Property::Border(property) => property.name(),
             Property::BorderColor(property) => property.name(),
             Property::BorderStyle(property) => property.name(),
             Property::BorderWidth(property) => property.name(),
@@ -122,6 +126,7 @@ impl PropertyRegistry {
         };
 
         property_builder.register(Box::new(BackgroundColor::new()));
+        property_builder.register(Box::new(Border::new()));
         property_builder.register(Box::new(BorderStyle::new()));
         property_builder.register(Box::new(BorderWidth::new()));
         property_builder.register(Box::new(BorderColor::new()));
