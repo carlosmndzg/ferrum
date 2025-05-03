@@ -49,15 +49,14 @@ impl Window {
 
     fn render(&mut self, node: &StyledNode, size: (usize, usize), file_path: &Path) -> DrawTarget {
         let mut font_ctx = FontsContext::new();
-        let reference = &mut font_ctx;
-        let root = layout::build_layout_tree(node, file_path, size);
-        let commands = CommandList::new(&root, reference, file_path);
         let mut dt = DrawTarget::new(size.0 as i32, size.1 as i32);
+        let root = layout::build_layout_tree(node, file_path, size);
+        let commands = CommandList::new(&root, &mut font_ctx, file_path);
 
         self.clear_canvas(&mut dt);
 
         for command in &commands {
-            command.execute(&mut dt, reference);
+            command.execute(&mut dt, &mut font_ctx);
         }
 
         dt

@@ -40,7 +40,7 @@ impl CommandList {
         instance
     }
 
-    pub(crate) fn build_commands(
+    fn build_commands(
         &mut self,
         node: &LayoutNode,
         fonts_ctx: &mut FontsContext,
@@ -60,7 +60,7 @@ impl CommandList {
         }
     }
 
-    pub(crate) fn build_commands_for_border(&mut self, node: &LayoutNode) {
+    fn build_commands_for_border(&mut self, node: &LayoutNode) {
         if let BoxType::Block(
             Block {
                 node: styled_node, ..
@@ -87,7 +87,7 @@ impl CommandList {
         }
     }
 
-    pub(crate) fn build_commands_for_background(&mut self, node: &LayoutNode) {
+    fn build_commands_for_background(&mut self, node: &LayoutNode) {
         if let BoxType::Block(
             Block {
                 node: styled_node, ..
@@ -109,7 +109,7 @@ impl CommandList {
         }
     }
 
-    pub(crate) fn build_commands_for_image(&mut self, node: &LayoutNode, document_path: &Path) {
+    fn build_commands_for_image(&mut self, node: &LayoutNode, document_path: &Path) {
         let (BoxType::Block(Block {
             node: styled_node, ..
         })
@@ -141,11 +141,7 @@ impl CommandList {
         )));
     }
 
-    pub(crate) fn build_commands_for_text(
-        &mut self,
-        node: &LayoutNode,
-        fonts_ctx: &mut FontsContext,
-    ) {
+    fn build_commands_for_text(&mut self, node: &LayoutNode, fonts_ctx: &mut FontsContext) {
         let BoxType::Word(Word {
             text,
             font_size,
