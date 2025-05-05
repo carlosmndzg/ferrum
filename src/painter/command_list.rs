@@ -74,7 +74,7 @@ impl CommandList {
             let border_box = node.box_dimensions.border_box();
             let border_width = styled_node
                 .border_width()
-                .actual_value(styled_node.border_style().value());
+                .actual_value(styled_node.border_style().actual_value());
 
             self.commands.push(Box::new(DrawBorder::new(
                 border_box.x,
@@ -96,7 +96,7 @@ impl CommandList {
         )
         | BoxType::Inline(Inline { node: styled_node }) = node.box_type
         {
-            let background_color = styled_node.background_color().value();
+            let background_color = styled_node.background_color().actual_value();
             let padding_box = node.box_dimensions.padding_box();
 
             self.commands.push(Box::new(DrawRectangle::new(

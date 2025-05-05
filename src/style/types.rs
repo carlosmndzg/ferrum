@@ -83,15 +83,15 @@ impl StyledNode<'_> {
     }
 
     pub(crate) fn has_display_none(&self) -> bool {
-        self.display().value() == &Value::Keyword("none".to_string())
+        self.display().actual_value() == &Value::Keyword("none".to_string())
     }
 
     pub(crate) fn is_block_level(&self) -> bool {
-        self.display().value() == &Value::Keyword("block".to_string())
+        self.display().actual_value() == &Value::Keyword("block".to_string())
     }
 
     pub(crate) fn is_inline_level(&self) -> bool {
-        self.display().value() == &Value::Keyword("inline".to_string())
+        self.display().actual_value() == &Value::Keyword("inline".to_string())
     }
 
     pub(crate) fn box_type(&self, formatting_context: FormattingContext) -> BoxType {

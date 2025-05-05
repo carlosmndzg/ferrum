@@ -52,11 +52,11 @@ impl Block<'_> {
         let border_left = self
             .node
             .border_width()
-            .actual_value(self.node.border_style().value());
+            .actual_value(self.node.border_style().actual_value());
         let border_right = self
             .node
             .border_width()
-            .actual_value(self.node.border_style().value());
+            .actual_value(self.node.border_style().actual_value());
         let mut width = self
             .node
             .width()
@@ -207,11 +207,11 @@ impl Block<'_> {
         let border_top = self
             .node
             .border_width()
-            .actual_value(self.node.border_style().value());
+            .actual_value(self.node.border_style().actual_value());
         let border_bottom = self
             .node
             .border_width()
-            .actual_value(self.node.border_style().value());
+            .actual_value(self.node.border_style().actual_value());
 
         node.box_dimensions.margin.top = margin_top;
         node.box_dimensions.margin.bottom = margin_bottom;

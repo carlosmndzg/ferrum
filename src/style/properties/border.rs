@@ -69,7 +69,19 @@ impl CssProperty for Border {
 
                 border_color_found = true;
                 ans.extend(BorderColor::new().maybe_new(&[v.clone()]));
+            } else {
+                return Vec::new();
             }
+        }
+
+        if !border_width_found {
+            ans.extend(BorderWidth::new().initial_value());
+        }
+        if !border_style_found {
+            ans.extend(BorderStyle::new().initial_value());
+        }
+        if !border_color_found {
+            ans.extend(BorderColor::new().initial_value());
         }
 
         ans

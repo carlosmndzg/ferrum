@@ -50,3 +50,21 @@ p {
     display: block;
     margin: 8px 0;
 }
+
+a {
+    color: blue;
+}
+
+dl {
+    display: block;
+    margin: 16px 0;
+}
+
+dt {
+    display: block;
+}
+
+dd {
+    display: block;
+    margin-left: 40px;
+}

@@ -15,7 +15,7 @@ impl BorderStyle {
         }
     }
 
-    pub(crate) fn value(&self) -> &Value {
+    pub(crate) fn actual_value(&self) -> &Value {
         &self.value
     }
 }
