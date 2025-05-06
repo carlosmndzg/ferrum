@@ -1,8 +1,7 @@
 use std::path::Path;
 
+use crate::layout::types::{LayoutNode, LayoutNodeFactory};
 use crate::style::types::StyledNode;
-
-use super::types::{BoxDimensions, EdgeSizes, LayoutNode, Rectangle};
 
 pub(crate) struct LayoutTreeBuilder<'a> {
     dimensions: (usize, usize),
@@ -26,16 +25,11 @@ impl LayoutTreeBuilder<'_> {
     }
 
     fn build_icb<'a>(&self, root: LayoutNode<'a>) -> LayoutNode<'a> {
-        LayoutNode {
-            box_dimensions: BoxDimensions {
-                content: Rectangle::default(),
-                padding: EdgeSizes::default(),
-                border: EdgeSizes::default(),
-                margin: EdgeSizes::default(),
-            },
-            box_type: Default::default(),
-            children: vec![root],
-        }
+        let mut icb = LayoutNodeFactory::anonymous_box();
+
+        icb.children.push(root);
+
+        icb
     }
 
     fn compute_boxes(&self, icb: &mut LayoutNode) {

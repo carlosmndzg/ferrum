@@ -49,7 +49,6 @@ pub(crate) enum Value {
 }
 
 #[derive(Default, Debug, Clone, PartialEq)]
-#[allow(dead_code)]
 pub(crate) struct Rgb {
     pub(crate) r: u8,
     pub(crate) g: u8,
@@ -64,7 +63,6 @@ impl Rgb {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-#[allow(dead_code)]
 pub(crate) enum Unit {
     Px,
     None,

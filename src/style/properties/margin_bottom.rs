@@ -6,7 +6,6 @@ use crate::{
 use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
-#[allow(dead_code)]
 pub(crate) struct MarginBottom {
     value: Value,
 }

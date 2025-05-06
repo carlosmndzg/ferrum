@@ -6,7 +6,6 @@ use super::{
 };
 
 #[derive(Debug, Clone, PartialEq)]
-#[allow(dead_code)]
 pub(crate) struct Padding;
 
 impl Padding {

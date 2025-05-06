@@ -1,5 +1,4 @@
 #[derive(Debug, Default, Clone)]
-#[allow(unused)]
 pub(crate) struct Rectangle {
     pub(crate) x: f32,
     pub(crate) y: f32,
@@ -8,7 +7,6 @@ pub(crate) struct Rectangle {
 }
 
 #[derive(Debug, Default)]
-#[allow(unused)]
 pub(crate) struct EdgeSizes {
     pub(crate) top: f32,
     pub(crate) left: f32,
@@ -17,7 +15,6 @@ pub(crate) struct EdgeSizes {
 }
 
 #[derive(Debug, Default)]
-#[allow(unused)]
 pub(crate) struct BoxDimensions {
     pub(crate) content: Rectangle,
     pub(crate) padding: EdgeSizes,

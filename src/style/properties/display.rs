@@ -3,7 +3,6 @@ use crate::{css::types::Value, style::validations::Validations};
 use super::{CssProperty, Property};
 
 #[derive(Debug, Clone, PartialEq)]
-#[allow(dead_code)]
 pub(crate) struct Display {
     value: Value,
 }
