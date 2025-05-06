@@ -105,15 +105,6 @@ impl StyledNode<'_> {
         }
     }
 
-    pub(crate) fn is_inline_in_block_context(
-        &self,
-        formatting_context: &FormattingContext,
-    ) -> bool {
-        self.is_inline_level()
-            && !self.children.is_empty()
-            && formatting_context == &FormattingContext::Block
-    }
-
     pub(crate) fn children_displayed(&self) -> Vec<&StyledNode> {
         self.children
             .iter()
@@ -124,11 +115,7 @@ impl StyledNode<'_> {
     pub(crate) fn formatting_context(&self) -> FormattingContext {
         let children = self.children_displayed();
 
-        if children.is_empty() {
-            return FormattingContext::Block;
-        }
-
-        if children.iter().any(|child| child.is_block_level()) {
+        if children.is_empty() || children.iter().any(|child| child.is_block_level()) {
             FormattingContext::Block
         } else {
             FormattingContext::Inline

@@ -11,7 +11,7 @@ use crate::{css::types::Rgb, style::properties::text_align::TextAlign, NodeType}
 
 use super::{
     box_types::{block::Block, inline::Inline, word::Word as WordBox},
-    types::{BoxType, LayoutNode},
+    types::{BoxType, LayoutNode, LayoutNodeFactory},
 };
 
 #[derive(Debug, PartialEq)]
@@ -70,7 +70,7 @@ impl FormattingContext {
         let containing_block_x = node.box_dimensions.content.x;
         let containing_block_y = node.box_dimensions.content.y;
 
-        let mut current_line = LayoutNode::create_line_box();
+        let mut current_line = LayoutNodeFactory::line_box();
         current_line.box_dimensions.content.width = 0.0;
         current_line.box_dimensions.content.x = containing_block_x;
 
@@ -88,7 +88,7 @@ impl FormattingContext {
             {
                 let height = word.font_size;
                 let width = word.width;
-                let mut word = LayoutNode::create_word_box(
+                let mut word = LayoutNodeFactory::word_box(
                     word.text.clone(),
                     word.font_size,
                     word.line_height,
@@ -108,7 +108,7 @@ impl FormattingContext {
                 i += 1;
             } else {
                 node.children.push(current_line);
-                current_line = LayoutNode::create_line_box();
+                current_line = LayoutNodeFactory::line_box();
                 current_line.box_dimensions.content.width = 0.0;
                 current_line.box_dimensions.content.x = containing_block_x;
             }
