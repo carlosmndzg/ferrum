@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::layout::types::{LayoutNode, LayoutNodeFactory};
+use crate::layout::layout_node::{LayoutNode, LayoutNodeFactory};
 use crate::style::types::StyledNode;
 
 pub(crate) struct LayoutTreeBuilder<'a> {

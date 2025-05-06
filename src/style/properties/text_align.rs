@@ -1,10 +1,8 @@
-use crate::{
-    css::types::Value,
-    layout::types::{BoxType, LayoutNode},
-    style::validations::Validations,
-};
-
-use super::{CssProperty, Property};
+use crate::css::types::Value;
+use crate::layout::box_types::BoxType;
+use crate::layout::layout_node::LayoutNode;
+use crate::style::properties::{CssProperty, Property};
+use crate::style::validations::Validations;
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TextAlign {

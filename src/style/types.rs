@@ -1,12 +1,10 @@
-use core::fmt;
 use std::collections::HashMap;
 
 use crate::{
     css::types::{Declaration, Value},
     layout::{
-        box_types::{block::Block, inline::Inline},
+        box_types::{block::Block, inline::Inline, BoxType},
         formatting_context::FormattingContext,
-        types::BoxType,
     },
     style::properties::{
         background_color::BackgroundColor, border_color::BorderColor, border_style::BorderStyle,
@@ -28,16 +26,6 @@ pub(crate) struct StyledNode<'a> {
     pub(crate) children: Vec<StyledNode<'a>>,
 }
 
-impl fmt::Debug for StyledNode<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("StyledNode")
-            .field("node", &self.node_representation())
-            .field("styles", &self.styles)
-            .field("children", &self.children)
-            .finish()
-    }
-}
-
 macro_rules! generate_property_getter {
     ($name:ident, $property_type:ident) => {
         #[allow(unused)]
@@ -54,18 +42,6 @@ macro_rules! generate_property_getter {
 }
 
 impl StyledNode<'_> {
-    fn node_representation(&self) -> String {
-        self.node_type_summary(&self.node.node_type)
-    }
-
-    fn node_type_summary(&self, node_type: &NodeType) -> String {
-        match node_type {
-            NodeType::Element(element) => element.tag_name().to_string(),
-            NodeType::Text(text) => text.get().to_string(),
-            _ => String::new(),
-        }
-    }
-
     pub(crate) fn is_empty_text_node(&self) -> bool {
         if let NodeType::Text(text) = &self.node.node_type {
             return text.get().trim().is_empty();

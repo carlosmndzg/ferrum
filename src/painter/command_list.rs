@@ -2,8 +2,9 @@ use std::path::Path;
 
 use crate::{
     layout::{
+        box_types::BoxType,
         box_types::{block::Block, inline::Inline, word::Word},
-        types::{BoxType, LayoutNode},
+        layout_node::LayoutNode,
     },
     NodeType,
 };

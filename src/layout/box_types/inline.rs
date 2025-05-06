@@ -1,6 +1,6 @@
 use crate::style::types::StyledNode;
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub(crate) struct Inline<'a> {
     pub(crate) node: &'a StyledNode<'a>,
 }

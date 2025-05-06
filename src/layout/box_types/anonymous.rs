@@ -1,14 +1,11 @@
 use std::path::Path;
 
-use crate::{
-    layout::{
-        formatting_context::FormattingContext,
-        types::{BoxDimensions, BoxType, LayoutNode},
-    },
-    style::properties::text_align::TextAlign,
-};
-
 use super::inline::Inline;
+use crate::layout::box_dimensions::BoxDimensions;
+use crate::layout::box_types::BoxType;
+use crate::layout::formatting_context::FormattingContext;
+use crate::layout::layout_node::LayoutNode;
+use crate::style::properties::text_align::TextAlign;
 
 #[derive(Debug, PartialEq, Default)]
 pub(crate) struct Anonymous;

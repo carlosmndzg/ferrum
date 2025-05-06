@@ -7,12 +7,10 @@ use font_kit::{
     source::SystemSource,
 };
 
+use crate::layout::box_types::BoxType;
+use crate::layout::box_types::{block::Block, inline::Inline, word::Word as WordBox};
+use crate::layout::layout_node::{LayoutNode, LayoutNodeFactory};
 use crate::{css::types::Rgb, style::properties::text_align::TextAlign, NodeType};
-
-use super::{
-    box_types::{block::Block, inline::Inline, word::Word as WordBox},
-    types::{BoxType, LayoutNode, LayoutNodeFactory},
-};
 
 #[derive(Debug, PartialEq)]
 pub(crate) enum FormattingContext {

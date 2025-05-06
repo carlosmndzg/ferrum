@@ -6,9 +6,16 @@ use crate::layout::box_types::inline::Inline;
 use crate::layout::box_types::line::Line;
 use crate::layout::box_types::word::Word;
 
-use super::{BoxDimensions, LayoutNode};
+use crate::layout::box_dimensions::BoxDimensions;
+use crate::layout::layout_node::LayoutNode;
 
-#[derive(Debug, PartialEq)]
+pub(crate) mod anonymous;
+pub(crate) mod block;
+pub(crate) mod inline;
+pub(crate) mod line;
+pub(crate) mod word;
+
+#[derive(PartialEq)]
 pub(crate) enum BoxType<'a> {
     Block(Block<'a>),
     Inline(Inline<'a>),

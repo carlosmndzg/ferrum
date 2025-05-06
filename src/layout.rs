@@ -1,22 +1,14 @@
 use std::path::Path;
 
-use tree_builder::LayoutTreeBuilder;
-use types::LayoutNode;
-
+use crate::layout::layout_node::LayoutNode;
+use crate::layout::tree_builder::LayoutTreeBuilder;
 use crate::style::types::StyledNode;
 
-mod tree_builder;
-pub(crate) mod types;
-
-pub(crate) mod box_types {
-    pub(crate) mod anonymous;
-    pub(crate) mod block;
-    pub(crate) mod inline;
-    pub(crate) mod line;
-    pub(crate) mod word;
-}
-
+pub(crate) mod box_dimensions;
+pub(crate) mod box_types;
 pub(crate) mod formatting_context;
+pub(crate) mod layout_node;
+pub(crate) mod tree_builder;
 
 pub fn build_layout_tree<'a>(
     style_tree: &'a StyledNode,

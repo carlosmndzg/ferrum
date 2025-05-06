@@ -4,7 +4,7 @@ use std::path::Path;
 use crate::css::types::Rgb;
 use crate::layout::box_types::{anonymous::Anonymous, block::Block, line::Line, word::Word};
 use crate::layout::formatting_context::FormattingContext;
-use crate::layout::types::{box_dimensions::BoxDimensions, box_types::BoxType};
+use crate::layout::{box_dimensions::BoxDimensions, box_types::BoxType};
 use crate::style::types::StyledNode;
 
 pub(crate) struct LayoutNodeFactory;

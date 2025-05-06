@@ -2,16 +2,13 @@ use std::path::Path;
 
 use image::GenericImageView;
 
-use crate::{
-    layout::{
-        formatting_context::FormattingContext,
-        types::{BoxDimensions, LayoutNode},
-    },
-    style::types::StyledNode,
-    NodeType,
-};
+use crate::layout::box_dimensions::BoxDimensions;
+use crate::layout::formatting_context::FormattingContext;
+use crate::layout::layout_node::LayoutNode;
+use crate::style::types::StyledNode;
+use crate::NodeType;
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub(crate) struct Block<'a> {
     pub(crate) node: &'a StyledNode<'a>,
     pub(crate) formatting_context: FormattingContext,
