@@ -115,14 +115,15 @@ impl<'a> LayoutNode<'a> {
 
             if last_child_is_anonymous {
                 last_child.children.push(child.into());
+                return;
             }
-        } else {
-            let mut anonymous = LayoutNodeFactory::anonymous_box();
-
-            anonymous.children.push(child.into());
-
-            self.children.push(anonymous);
         }
+
+        let mut anonymous = LayoutNodeFactory::anonymous_box();
+
+        anonymous.children.push(child.into());
+
+        self.children.push(anonymous);
     }
 }
 
