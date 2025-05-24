@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .block {
+        display: block;
+        width: 300px;
+        height: 100px;
+        background-color: lightblue;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .inline-container {
+        display: block;
+        background-color: lightgray;
+        text-align: right;
+        padding: 10px 0;
+      }
+
+      .inline-child {
+        display: inline;
+        color: red;
+      }
+
+      .none {
+        display: none;
+      }
+
+      .img-block {
+        display: block;
+        width: 200px;
+        height: auto;
+      }
+
+      .landscape {
+        display: block;
+        width: 400px;
+        height: 150px;
+        margin: 10px auto 0;
+      }
+
+      .inline-span {
+        display: inline;
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="block">Block-level element with centered inline content</div>
+    <div class="inline-container">
+      <span class="inline-child">Right-aligned inline content</span>
+    </div>
+    <div class="none">This should not be displayed</div>
+    <p>This is the first paragraph in the initial Block Formatting Context.</p>
+    <p>This is the second paragraph in the same formatting context.</p>
+    Anonymous block level box
+    <div>
+      Anoynmous inline box
+      <span class="inline-span">Inline element.</span>
+    </div>
+    <img class="img-block" src="tc8_image1.jpg" alt="Replaced element: sheep" />
+    <img
+      class="landscape"
+      src="tc8_image2.jpg"
+      alt="Replaced element: landscape"
+    />
+  </body>
+</html>

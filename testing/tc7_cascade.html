@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      p {
+        color: blue;
+        text-align: right;
+      }
+      .important {
+        color: green;
+      }
+      p {
+        color: red;
+      }
+      .override {
+        color: purple;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="important">
+      <p>This paragraph tests specificity and cascade order.</p>
+      <p class="override" style="color: orange">
+        This paragraph has both an inline style and a class. Inline should win.
+      </p>
+      <span>This span inherits the color from its parent div.</span>
+    </div>
+    <p>This paragraph is affected by cascade and defaults.</p>
+  </body>
+</html>

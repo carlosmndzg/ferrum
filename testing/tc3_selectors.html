@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      * { font-weight: bold; }
+
+      div { color: red; }
+
+      .class-selector { background-color: lightblue; }
+
+      #id-selector { background-color: lightgreen; }
+
+      div.class-selector#compound-id {
+        background-color: orange;
+      }
+
+      h1, .class-selector#compound-id, p {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div>Element selector</div>
+    <div class="class-selector">Class selector</div>
+    <div id="id-selector">ID selector</div>
+    <div class="class-selector" id="compound-id">Compound selector</div>
+    <h1>Selector list (h1)</h1>
+    <p>Selector list (p)</p>
+  </body>
+</html>
