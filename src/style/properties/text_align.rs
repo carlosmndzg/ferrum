@@ -53,6 +53,11 @@ impl TextAlign {
 
     fn apply_text_align_justify(&self, node: &mut LayoutNode) {
         let length = node.children.len();
+
+        if length <= 1 {
+            return;
+        }
+
         let lines_except_last = &mut node.children[..length - 1];
 
         for line in lines_except_last {
